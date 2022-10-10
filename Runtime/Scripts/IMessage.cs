@@ -2,6 +2,6 @@ namespace HereticalSolutions.Messaging
 {
 	public interface IMessage
 	{
-		void Write(params object[] args);
+		IMessage Write(params object[] args);
 	}
 }
