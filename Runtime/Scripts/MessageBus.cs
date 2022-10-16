@@ -71,6 +71,16 @@ namespace HereticalSolutions.Messaging
             return this;
         }
 
+		public MessageBus Write(IMessage message, params object[] args)
+		{
+			if (message == null)
+				throw new Exception($"[MessageBus] INVALID MESSAGE");
+
+			message.Write(args);
+
+			return this;
+		}
+
         public void Send(IMessage message)
         {
             mailbox.Enqueue(message);
