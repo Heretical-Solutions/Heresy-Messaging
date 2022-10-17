@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UniRx;
 
 using HereticalSolutions.Collections.Managed;
+using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging
 {
@@ -21,7 +22,7 @@ namespace HereticalSolutions.Messaging
     {
         private IMessageBroker broker;
 
-        private Dictionary<Type, StackPool<IMessage>> messageRepository;
+        private IRepository<Type, StackPool<IMessage>> messageRepository;
 
         private Queue<IMessage> mailbox;
 
@@ -29,7 +30,7 @@ namespace HereticalSolutions.Messaging
 
         public MessageBus(
             IMessageBroker broker,
-			Dictionary<Type, StackPool<IMessage>> messageRepository,
+			IRepository<Type, StackPool<IMessage>> messageRepository,
 			Queue<IMessage> mailbox)
         {
             this.broker = broker;
@@ -49,7 +50,7 @@ namespace HereticalSolutions.Messaging
 
 		public MessageBus PopMessage(Type messageType, out IMessage message)
 		{
-			if (!messageRepository.TryGetValue(
+			if (!messageRepository.TryGet(
 				messageType,
 				out StackPool<IMessage> messagePool))
 				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
@@ -61,7 +62,7 @@ namespace HereticalSolutions.Messaging
 
         public MessageBus PopMessage<TMessage>(out TMessage message) where TMessage : IMessage
         {
-            if (!messageRepository.TryGetValue(
+            if (!messageRepository.TryGet(
                 typeof(TMessage),
                 out StackPool<IMessage> messagePool))
                 throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
@@ -137,7 +138,7 @@ namespace HereticalSolutions.Messaging
         {
             var messageType = message.GetType();
 
-			if (!messageRepository.TryGetValue(
+			if (!messageRepository.TryGet(
 				messageType,
 				out StackPool<IMessage> messagePool))
 				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
@@ -147,7 +148,7 @@ namespace HereticalSolutions.Messaging
 
 		private void PushMessage<TMessage>(TMessage message) where TMessage : IMessage
 		{
-			if (!messageRepository.TryGetValue(
+			if (!messageRepository.TryGet(
 				typeof(TMessage),
 				out StackPool<IMessage> messagePool))
 				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");

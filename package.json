@@ -1,9 +1,10 @@
 {
   "name": "com.hereticalsolutions.heresy-messaging",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "displayName": "Heresy Messaging",
   "description": "Message buses, mediators, mailboxes and messaging service",
   "unity": "2020.3",
+  "license": "MIT",
   "keywords": [
     "memory",
     "heretical-solutions"
@@ -13,6 +14,7 @@
     "email": "benevolentdrone@gmail.com"
   },
   "gitDependencies": {
-    "com.hereticalsolutions.heresy-memory": "https://github.com/Heretical-Solutions/Heresy-memory.git"
+    "com.hereticalsolutions.heresy-memory": "https://github.com/Heretical-Solutions/Heresy-memory.git#0.1.3",
+    "com.hereticalsolutions.heresy-databases-and-repositories": "https://github.com/Heretical-Solutions/Heresy-Databases-and-Repositories.git#0.1.1"
   }
 }

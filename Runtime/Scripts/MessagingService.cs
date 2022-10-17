@@ -1,21 +1,22 @@
 using System;
 using System.Collections.Generic;
+using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging
 {
 	public class MessagingService
 	{
-		private Dictionary<string, MessageBus> busRepository;
+		private IRepository<string, MessageBus> busRepository;
 
 		public MessagingService(
-			Dictionary<string, MessageBus> busRepository)
+			IRepository<string, MessageBus> busRepository)
 		{
 			this.busRepository = busRepository;
 		}
 
 		public MessageBus Get(string ID)
 		{
-			if (!busRepository.TryGetValue(ID, out MessageBus messageBus))
+			if (!busRepository.TryGet(ID, out MessageBus messageBus))
 				throw new Exception($"[MessagingService] INVALID BUS ID: {ID}");
 
 			return messageBus;
