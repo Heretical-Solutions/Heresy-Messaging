@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging
