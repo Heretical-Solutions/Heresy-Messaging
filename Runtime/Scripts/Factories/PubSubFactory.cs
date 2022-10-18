@@ -13,9 +13,9 @@ namespace HereticalSolutions.Messaging.Factories
 	{
 		public static Pinger BuildPinger()
 		{
-			Func<Action> valueAllocationDelegate = () => { return null; };
+			Func<PingerSubscription> valueAllocationDelegate = () => { return null; };
 
-			var arrayPool = CollectionFactory.BuildNonAllocPool<Action>(
+			var arrayPool = CollectionFactory.BuildNonAllocPool<PingerSubscription>(
 				valueAllocationDelegate,
 				CollectionFactory.BuildIndexedContainer,
 				new AllocationCommandDescriptor
@@ -27,7 +27,26 @@ namespace HereticalSolutions.Messaging.Factories
 					Rule = EAllocationAmountRule.DOUBLE_AMOUNT
 				});
 
-			var indexable = (IIndexable<IPoolElement<Action>>)((IContentsRetrievable<IndexedPackedArray<Action>>)arrayPool).Contents;
+			var indexable = (IIndexable<IPoolElement<PingerSubscription>>)((IContentsRetrievable<IndexedPackedArray<PingerSubscription>>)arrayPool).Contents;
+
+			return new Pinger(
+				arrayPool,
+				indexable);
+		}
+
+		public static Pinger BuildPinger(
+			AllocationCommandDescriptor initial,
+			AllocationCommandDescriptor additional)
+		{
+			Func<PingerSubscription> valueAllocationDelegate = () => { return null; };
+
+			var arrayPool = CollectionFactory.BuildNonAllocPool<PingerSubscription>(
+				valueAllocationDelegate,
+				CollectionFactory.BuildIndexedContainer,
+				initial,
+				additional);
+
+			var indexable = (IIndexable<IPoolElement<PingerSubscription>>)((IContentsRetrievable<IndexedPackedArray<PingerSubscription>>)arrayPool).Contents;
 
 			return new Pinger(
 				arrayPool,
@@ -36,9 +55,9 @@ namespace HereticalSolutions.Messaging.Factories
 
 		public static Broadcaster<T> BuildBroadcaster<T>()
 		{
-			Func<Action<T>> valueAllocationDelegate = () => { return null; };
+			Func<BroadcasterSubscription<T>> valueAllocationDelegate = () => { return null; };
 
-			var arrayPool = CollectionFactory.BuildNonAllocPool<Action<T>>(
+			var arrayPool = CollectionFactory.BuildNonAllocPool<BroadcasterSubscription<T>>(
 				valueAllocationDelegate,
 				CollectionFactory.BuildIndexedContainer,
 				new AllocationCommandDescriptor
@@ -50,7 +69,26 @@ namespace HereticalSolutions.Messaging.Factories
 					Rule = EAllocationAmountRule.DOUBLE_AMOUNT
 				});
 
-			var indexable = (IIndexable<IPoolElement<Action<T>>>)((IContentsRetrievable<IndexedPackedArray<Action<T>>>)arrayPool).Contents;
+			var indexable = (IIndexable<IPoolElement<BroadcasterSubscription<T>>>)((IContentsRetrievable<IndexedPackedArray<BroadcasterSubscription<T>>>)arrayPool).Contents;
+
+			return new Broadcaster<T>(
+				arrayPool,
+				indexable);
+		}
+
+		public static Broadcaster<T> BuildBroadcaster<T>(
+			AllocationCommandDescriptor initial,
+			AllocationCommandDescriptor additional)
+		{
+			Func<BroadcasterSubscription<T>> valueAllocationDelegate = () => { return null; };
+
+			var arrayPool = CollectionFactory.BuildNonAllocPool<BroadcasterSubscription<T>>(
+				valueAllocationDelegate,
+				CollectionFactory.BuildIndexedContainer,
+				initial,
+				additional);
+
+			var indexable = (IIndexable<IPoolElement<BroadcasterSubscription<T>>>)((IContentsRetrievable<IndexedPackedArray<BroadcasterSubscription<T>>>)arrayPool).Contents;
 
 			return new Broadcaster<T>(
 				arrayPool,

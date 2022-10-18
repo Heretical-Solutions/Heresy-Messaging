@@ -1,6 +1,6 @@
 {
   "name": "com.hereticalsolutions.heresy-messaging",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "displayName": "Heresy Messaging",
   "description": "Message buses, mediators, mailboxes and messaging service",
   "unity": "2020.3",

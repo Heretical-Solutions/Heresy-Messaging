@@ -1,32 +1,27 @@
 using System;
-using System.Collections.Generic;
-
-using UniRx;
-
 using HereticalSolutions.Collections;
 using HereticalSolutions.Collections.Managed;
-using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging
 {
 	public class Pinger
 	{
-		private INonAllocPool<Action> subscriptionsPool;
+		private INonAllocPool<PingerSubscription> subscriptionsPool;
 
-		private IIndexable<IPoolElement<Action>> subscriptionsArray;
+		private IIndexable<IPoolElement<PingerSubscription>> subscriptionsArray;
 
 		private bool modificationAllowed = true;
 
 		public Pinger(
-			INonAllocPool<Action> subscriptionsPool,
-			IIndexable<IPoolElement<Action>> subscriptionsArray)
+			INonAllocPool<PingerSubscription> subscriptionsPool,
+			IIndexable<IPoolElement<PingerSubscription>> subscriptionsArray)
 		{
 			this.subscriptionsPool = subscriptionsPool;
 
 			this.subscriptionsArray = subscriptionsArray;
 		}
 
-		public IPoolElement<Action> Subscribe()
+		public IPoolElement<PingerSubscription> Subscribe()
 		{
 			if (!modificationAllowed)
 				throw new Exception("[Pinger] Subscriber collection modification not allowed while ping is in progress");
@@ -38,12 +33,14 @@ namespace HereticalSolutions.Messaging
 			return subscription;
 		}
 
-		public void Unsubscribe(IPoolElement<Action> subscription)
+		public void Unsubscribe(IPoolElement<PingerSubscription> subscription)
 		{
 			if (!modificationAllowed)
 				throw new Exception("[Pinger] Subscriber collection modification not allowed while ping is in progress");
 
 			subscription.Value = null;
+
+			subscriptionsPool.Push(subscription);
 		}
 
 		public void Ping()
@@ -52,7 +49,7 @@ namespace HereticalSolutions.Messaging
 
 			for (int i = 0; i < subscriptionsArray.Count; i++)
 			{
-				subscriptionsArray[i].Value.Invoke();
+				subscriptionsArray[i].Value.Handle();
 			}
 
 			modificationAllowed = true;
