@@ -1,7 +1,6 @@
 using System;
 
 using HereticalSolutions.Allocations;
-using HereticalSolutions.Allocations.Internal;
 
 using HereticalSolutions.Collections;
 using HereticalSolutions.Collections.Managed;
@@ -15,7 +14,7 @@ namespace HereticalSolutions.Messaging.Factories
 		{
 			Func<PingerSubscription> valueAllocationDelegate = () => { return null; };
 
-			var arrayPool = CollectionFactory.BuildNonAllocPool<PingerSubscription>(
+			var arrayPool = CollectionFactory.BuildPackedArrayPool<PingerSubscription>(
 				valueAllocationDelegate,
 				CollectionFactory.BuildIndexedContainer,
 				new AllocationCommandDescriptor
@@ -40,7 +39,7 @@ namespace HereticalSolutions.Messaging.Factories
 		{
 			Func<PingerSubscription> valueAllocationDelegate = () => { return null; };
 
-			var arrayPool = CollectionFactory.BuildNonAllocPool<PingerSubscription>(
+			var arrayPool = CollectionFactory.BuildPackedArrayPool<PingerSubscription>(
 				valueAllocationDelegate,
 				CollectionFactory.BuildIndexedContainer,
 				initial,
@@ -57,7 +56,7 @@ namespace HereticalSolutions.Messaging.Factories
 		{
 			Func<BroadcasterSubscription<T>> valueAllocationDelegate = () => { return null; };
 
-			var arrayPool = CollectionFactory.BuildNonAllocPool<BroadcasterSubscription<T>>(
+			var arrayPool = CollectionFactory.BuildPackedArrayPool<BroadcasterSubscription<T>>(
 				valueAllocationDelegate,
 				CollectionFactory.BuildIndexedContainer,
 				new AllocationCommandDescriptor
@@ -82,7 +81,7 @@ namespace HereticalSolutions.Messaging.Factories
 		{
 			Func<BroadcasterSubscription<T>> valueAllocationDelegate = () => { return null; };
 
-			var arrayPool = CollectionFactory.BuildNonAllocPool<BroadcasterSubscription<T>>(
+			var arrayPool = CollectionFactory.BuildPackedArrayPool<BroadcasterSubscription<T>>(
 				valueAllocationDelegate,
 				CollectionFactory.BuildIndexedContainer,
 				initial,
