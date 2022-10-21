@@ -27,21 +27,21 @@ namespace HereticalSolutions.Messaging
 			pingArray = new PingerSubscription[subscriptionsArray.Capacity];
 		}
 
-		public IPoolElement<PingerSubscription> Subscribe()
+		public IPoolElement<PingerSubscription> Subscribe(PingerSubscription subscription)
 		{
-			var subscription = subscriptionsPool.Pop();
+			var subscriptionElement = subscriptionsPool.Pop();
 
-			subscription.Value = null;
+			subscriptionElement.Value = subscription;
 
-			return subscription;
+			return subscriptionElement;
 		}
 
-		public void Unsubscribe(IPoolElement<PingerSubscription> subscription)
+		public void Unsubscribe(IPoolElement<PingerSubscription> subscriptionElement)
 		{
 			if (pingInProgress)
 			{
 				for (int i = 0; i < pingCount; i++)
-					if (pingArray[i] == subscription.Value)
+					if (pingArray[i] == subscriptionElement.Value)
 					{
 						pingArray[i] = null;
 
@@ -49,9 +49,9 @@ namespace HereticalSolutions.Messaging
 					}
 			}
 
-			subscription.Value = null;
+			subscriptionElement.Value = null;
 
-			subscriptionsPool.Push(subscription);
+			subscriptionsPool.Push(subscriptionElement);
 		}
 
 		public void Ping()

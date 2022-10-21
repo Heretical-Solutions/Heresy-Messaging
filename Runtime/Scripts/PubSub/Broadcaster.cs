@@ -26,21 +26,21 @@ namespace HereticalSolutions.Messaging
 			broadcastArray = new BroadcasterSubscription<TValue>[subscriptionsArray.Capacity];
 		}
 
-		public IPoolElement<BroadcasterSubscription<TValue>> Subscribe()
+		public IPoolElement<BroadcasterSubscription<TValue>> Subscribe(BroadcasterSubscription<TValue> subscription)
 		{
-			var subscription = subscriptionsPool.Pop();
+			var subscriptionElement = subscriptionsPool.Pop();
 
-			subscription.Value = null;
+			subscriptionElement.Value = subscription;
 
-			return subscription;
+			return subscriptionElement;
 		}
 
-		public void Unsubscribe(IPoolElement<BroadcasterSubscription<TValue>> subscription)
+		public void Unsubscribe(IPoolElement<BroadcasterSubscription<TValue>> subscriptionElement)
 		{
 			if (broadcastInProgress)
 			{
 				for (int i = 0; i < broadcastCount; i++)
-					if (broadcastArray[i] == subscription.Value)
+					if (broadcastArray[i] == subscriptionElement.Value)
 					{
 						broadcastArray[i] = null;
 
@@ -48,9 +48,9 @@ namespace HereticalSolutions.Messaging
 					}
 			}
 
-			subscription.Value = null;
+			subscriptionElement.Value = null;
 
-			subscriptionsPool.Push(subscription);
+			subscriptionsPool.Push(subscriptionElement);
 		}
 
 		public void Broadcast(TValue value)
