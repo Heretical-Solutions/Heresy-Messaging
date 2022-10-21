@@ -26,11 +26,11 @@ namespace HereticalSolutions.Messaging.Factories
 					Rule = EAllocationAmountRule.DOUBLE_AMOUNT
 				});
 
-			var indexable = (IIndexable<IPoolElement<PingerSubscription>>)((IContentsRetrievable<IndexedPackedArray<PingerSubscription>>)arrayPool).Contents;
+			var packedArray = ((IContentsRetrievable<IndexedPackedArray<PingerSubscription>>)arrayPool).Contents;
 
 			return new Pinger(
 				arrayPool,
-				indexable);
+				packedArray);
 		}
 
 		public static Pinger BuildPinger(
@@ -45,11 +45,11 @@ namespace HereticalSolutions.Messaging.Factories
 				initial,
 				additional);
 
-			var indexable = (IIndexable<IPoolElement<PingerSubscription>>)((IContentsRetrievable<IndexedPackedArray<PingerSubscription>>)arrayPool).Contents;
+			var packedArray = ((IContentsRetrievable<IndexedPackedArray<PingerSubscription>>)arrayPool).Contents;
 
 			return new Pinger(
 				arrayPool,
-				indexable);
+				packedArray);
 		}
 
 		public static Broadcaster<T> BuildBroadcaster<T>()
@@ -68,11 +68,11 @@ namespace HereticalSolutions.Messaging.Factories
 					Rule = EAllocationAmountRule.DOUBLE_AMOUNT
 				});
 
-			var indexable = (IIndexable<IPoolElement<BroadcasterSubscription<T>>>)((IContentsRetrievable<IndexedPackedArray<BroadcasterSubscription<T>>>)arrayPool).Contents;
+			var packedArray = ((IContentsRetrievable<IndexedPackedArray<BroadcasterSubscription<T>>>)arrayPool).Contents;
 
 			return new Broadcaster<T>(
 				arrayPool,
-				indexable);
+				packedArray);
 		}
 
 		public static Broadcaster<T> BuildBroadcaster<T>(
@@ -87,11 +87,11 @@ namespace HereticalSolutions.Messaging.Factories
 				initial,
 				additional);
 
-			var indexable = (IIndexable<IPoolElement<BroadcasterSubscription<T>>>)((IContentsRetrievable<IndexedPackedArray<BroadcasterSubscription<T>>>)arrayPool).Contents;
+			var packedArray = ((IContentsRetrievable<IndexedPackedArray<BroadcasterSubscription<T>>>)arrayPool).Contents;
 
 			return new Broadcaster<T>(
 				arrayPool,
-				indexable);
+				packedArray);
 		}
 	}
 }

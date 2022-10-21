@@ -1,4 +1,3 @@
-using System;
 using HereticalSolutions.Collections;
 using HereticalSolutions.Collections.Managed;
 
@@ -8,24 +7,27 @@ namespace HereticalSolutions.Messaging
 	{
 		private INonAllocPool<BroadcasterSubscription<TValue>> subscriptionsPool;
 
-		private IIndexable<IPoolElement<BroadcasterSubscription<TValue>>> subscriptionsArray;
+		private IndexedPackedArray<BroadcasterSubscription<TValue>> subscriptionsArray;
 
-		private bool modificationAllowed = true;
+		private BroadcasterSubscription<TValue>[] broadcastArray;
+
+		private int broadcastCount = -1;
+
+		private bool broadcastInProgress = false;
 
 		public Broadcaster(
 			INonAllocPool<BroadcasterSubscription<TValue>> subscriptionsPool,
-			IIndexable<IPoolElement<BroadcasterSubscription<TValue>>> subscriptionsArray)
+			IndexedPackedArray<BroadcasterSubscription<TValue>> subscriptionsArray)
 		{
 			this.subscriptionsPool = subscriptionsPool;
 
 			this.subscriptionsArray = subscriptionsArray;
+
+			broadcastArray = new BroadcasterSubscription<TValue>[subscriptionsArray.Capacity];
 		}
 
 		public IPoolElement<BroadcasterSubscription<TValue>> Subscribe()
 		{
-			if (!modificationAllowed)
-				throw new Exception("[Pinger] Subscriber collection modification not allowed while ping is in progress");
-
 			var subscription = subscriptionsPool.Pop();
 
 			subscription.Value = null;
@@ -35,8 +37,16 @@ namespace HereticalSolutions.Messaging
 
 		public void Unsubscribe(IPoolElement<BroadcasterSubscription<TValue>> subscription)
 		{
-			if (!modificationAllowed)
-				throw new Exception("[Pinger] Subscriber collection modification not allowed while ping is in progress");
+			if (broadcastInProgress)
+			{
+				for (int i = 0; i < broadcastCount; i++)
+					if (broadcastArray[i] == subscription.Value)
+					{
+						broadcastArray[i] = null;
+
+						break;
+					}
+			}
 
 			subscription.Value = null;
 
@@ -45,14 +55,26 @@ namespace HereticalSolutions.Messaging
 
 		public void Broadcast(TValue value)
 		{
-			modificationAllowed = false;
+			if (broadcastArray.Length < subscriptionsArray.Capacity)
+				broadcastArray = new BroadcasterSubscription<TValue>[subscriptionsArray.Capacity];
 
-			for (int i = 0; i < subscriptionsArray.Count; i++)
+			broadcastCount = subscriptionsArray.Count;
+
+			for (int i = 0; i < broadcastCount; i++)
+				broadcastArray[i] = subscriptionsArray[i].Value;
+
+			broadcastInProgress = true;
+
+			for (int i = 0; i < broadcastCount; i++)
 			{
-				subscriptionsArray[i].Value.Handle(value);
+				if (broadcastArray[i] != null)
+					broadcastArray[i].Handle(value);
 			}
 
-			modificationAllowed = true;
+			broadcastInProgress = false;
+
+			for (int i = 0; i < broadcastCount; i++)
+				broadcastArray[i] = null;
 		}
 	}
 }

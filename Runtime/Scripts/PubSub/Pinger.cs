@@ -8,24 +8,27 @@ namespace HereticalSolutions.Messaging
 	{
 		private INonAllocPool<PingerSubscription> subscriptionsPool;
 
-		private IIndexable<IPoolElement<PingerSubscription>> subscriptionsArray;
+		private IndexedPackedArray<PingerSubscription> subscriptionsArray;
 
-		private bool modificationAllowed = true;
+		private PingerSubscription[] pingArray;
+
+		private int pingCount = -1;
+
+		private bool pingInProgress = false;
 
 		public Pinger(
 			INonAllocPool<PingerSubscription> subscriptionsPool,
-			IIndexable<IPoolElement<PingerSubscription>> subscriptionsArray)
+			IndexedPackedArray<PingerSubscription> subscriptionsArray)
 		{
 			this.subscriptionsPool = subscriptionsPool;
 
 			this.subscriptionsArray = subscriptionsArray;
+
+			pingArray = new PingerSubscription[subscriptionsArray.Capacity];
 		}
 
 		public IPoolElement<PingerSubscription> Subscribe()
 		{
-			if (!modificationAllowed)
-				throw new Exception("[Pinger] Subscriber collection modification not allowed while ping is in progress");
-
 			var subscription = subscriptionsPool.Pop();
 
 			subscription.Value = null;
@@ -35,8 +38,16 @@ namespace HereticalSolutions.Messaging
 
 		public void Unsubscribe(IPoolElement<PingerSubscription> subscription)
 		{
-			if (!modificationAllowed)
-				throw new Exception("[Pinger] Subscriber collection modification not allowed while ping is in progress");
+			if (pingInProgress)
+			{
+				for (int i = 0; i < pingCount; i++)
+					if (pingArray[i] == subscription.Value)
+					{
+						pingArray[i] = null;
+
+						break;
+					}
+			}
 
 			subscription.Value = null;
 
@@ -45,14 +56,26 @@ namespace HereticalSolutions.Messaging
 
 		public void Ping()
 		{
-			modificationAllowed = false;
+			if (pingArray.Length < subscriptionsArray.Capacity)
+				pingArray = new PingerSubscription[subscriptionsArray.Capacity];
 
-			for (int i = 0; i < subscriptionsArray.Count; i++)
+			pingCount = subscriptionsArray.Count;
+
+			for (int i = 0; i < pingCount; i++)
+				pingArray[i] = subscriptionsArray[i].Value;
+
+			pingInProgress = true;
+
+			for (int i = 0; i < pingCount; i++)
 			{
-				subscriptionsArray[i].Value.Handle();
+				if (pingArray[i] != null)
+					pingArray[i].Handle();
 			}
 
-			modificationAllowed = true;
+			pingInProgress = false;
+
+			for (int i = 0; i < pingCount; i++)
+				pingArray[i] = null;
 		}
 	}
 }
