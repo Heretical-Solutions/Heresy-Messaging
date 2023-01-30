@@ -1,5 +1,3 @@
-using UniRx;
-
 namespace HereticalSolutions.Messaging
 {
 	public interface IMessageReceivable

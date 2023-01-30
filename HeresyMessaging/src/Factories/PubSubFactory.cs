@@ -1,6 +1,6 @@
 using System;
 
-using HereticalSolutions.Allocations;
+using HereticalSolutions.Collections.Allocations;
 
 using HereticalSolutions.Collections;
 using HereticalSolutions.Collections.Managed;

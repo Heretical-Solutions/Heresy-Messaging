@@ -1,5 +1,4 @@
 using System;
-using UniRx;
 
 namespace HereticalSolutions.Messaging
 {
@@ -16,7 +15,5 @@ namespace HereticalSolutions.Messaging
 		void SendImmediately(IMessage message);
 
 		void SendImmediately<TMessage>(TMessage message) where TMessage : IMessage;
-
-		
 	}
 }
