@@ -5,12 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include = "../Dependencies/HeresyMemory/HeresyMemory/HeresyMemory.csproj" />
+    <ProjectReference Include="../Dependencies/HeresyMemory/HeresyMemory/HeresyMemory.csproj" />
   </ItemGroup>
-
-  //NOT working
-  //<ItemGroup>
-  //  <ProjectReference Include = "../Dependencies/UniRx/UniRx.asmdef" />
-  //</ItemGroup>
 
 </Project>
