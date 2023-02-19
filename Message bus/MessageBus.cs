@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-
-using UniRx;
-
-using HereticalSolutions.Collections.Managed;
+using HereticalSolutions.Collections;
 using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging
@@ -16,43 +13,51 @@ namespace HereticalSolutions.Messaging
     //3. To resolve recepients on addressed messages I shall add a trie (prefix tree) with early return option
     //   i.e. if address is "Entities/Entity 12" and there is only one node behind starting E then it performs full string comparison with the node and sends it the message
     public class MessageBus
-        : IMessageSubscribable,
+        : IMessageBus, 
+	      IMessageSubscribable,
           IMessageSendable,
           IMessageReceivable
     {
-        private IMessageBroker broker;
+        private IBroadcastable<IMessage> broadcaster;
 
-        private IRepository<Type, StackPool<IMessage>> messageRepository;
+        private IRepository<Type, IPool<IMessage>> messageRepository;
 
         private Queue<IMessage> mailbox;
 
-        public bool MailboxNotEmpty { get { return mailbox.Count != 0; } }
-
         public MessageBus(
-            IMessageBroker broker,
-			IRepository<Type, StackPool<IMessage>> messageRepository,
+	        IBroadcastable<IMessage> broadcaster,
+			IRepository<Type, IPool<IMessage>> messageRepository,
 			Queue<IMessage> mailbox)
         {
-            this.broker = broker;
+            this.broadcaster = broadcaster;
 
             this.messageRepository = messageRepository;
 
             this.mailbox = mailbox;
         }
 
-        public IDisposable SubscribeTo<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
+        public IPoolElement<BroadcasterSubscription<TMessage>> SubscribeTo<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
         {
-			return broker
+	        var subscription = 
+	        
+	        var subscriptionPoolElement = broadcaster.Subscribe()
+	        
+			return broadcaster
                 .Receive<TMessage>()
                 .Subscribe(message => receiverDelegate(message));
 				//.AddTo(disposables);
         }
 
-		public MessageBus PopMessage(Type messageType, out IMessage message)
+        public void UnsubscribeFrom()
+        {
+	        
+        }
+
+        public IMessageBus PopMessage(Type messageType, out IMessage message)
 		{
 			if (!messageRepository.TryGet(
 				messageType,
-				out StackPool<IMessage> messagePool))
+				out IPool<IMessage> messagePool))
 				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
 
 			message = messagePool.Pop();
@@ -60,11 +65,11 @@ namespace HereticalSolutions.Messaging
 			return this;
 		}
 
-        public MessageBus PopMessage<TMessage>(out TMessage message) where TMessage : IMessage
+        public IMessageBus PopMessage<TMessage>(out TMessage message) where TMessage : IMessage
         {
             if (!messageRepository.TryGet(
                 typeof(TMessage),
-                out StackPool<IMessage> messagePool))
+                out IPool<IMessage> messagePool))
                 throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
 
             message = (TMessage)messagePool.Pop();
@@ -72,7 +77,7 @@ namespace HereticalSolutions.Messaging
             return this;
         }
 
-		public MessageBus Write(IMessage message, params object[] args)
+		public IMessageBus Write(IMessage message, params object[] args)
 		{
 			if (message == null)
 				throw new Exception($"[MessageBus] INVALID MESSAGE");
@@ -94,33 +99,19 @@ namespace HereticalSolutions.Messaging
 
         public void SendImmediately(IMessage message)
         {
-            broker.Publish(message);
+            broadcaster.Broadcast(message);
 
             PushMessage(message);
         }
 
 		public void SendImmediately<TMessage>(TMessage message) where TMessage : IMessage
 		{
-			broker.Publish(message);
+			broadcaster.Broadcast(message);
 
             PushMessage<TMessage>(message);
 		}
 
-        public void Receive(int maxAmount)
-        {
-            int messagesToReceive = Math.Min(maxAmount, mailbox.Count);
-
-            for (int i = 0; i < messagesToReceive; i++)
-            {
-                var message = mailbox.Dequeue();
-
-				broker.Publish(message);
-
-				PushMessage(message);
-            }
-        }
-
-		public void ReceiveAll()
+		public void Receive()
 		{
 			int messagesToReceive = mailbox.Count;
 
@@ -128,7 +119,7 @@ namespace HereticalSolutions.Messaging
 			{
 				var message = mailbox.Dequeue();
 
-				broker.Publish(message);
+				broadcaster.Broadcast(message);
 
 				PushMessage(message);
 			}
@@ -140,7 +131,7 @@ namespace HereticalSolutions.Messaging
 
 			if (!messageRepository.TryGet(
 				messageType,
-				out StackPool<IMessage> messagePool))
+				out IPool<IMessage> messagePool))
 				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
 
 			messagePool.Push(message);
@@ -150,7 +141,7 @@ namespace HereticalSolutions.Messaging
 		{
 			if (!messageRepository.TryGet(
 				typeof(TMessage),
-				out StackPool<IMessage> messagePool))
+				out IPool<IMessage> messagePool))
 				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
 
 			messagePool.Push(message);

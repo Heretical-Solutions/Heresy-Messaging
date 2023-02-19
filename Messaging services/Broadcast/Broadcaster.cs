@@ -1,9 +1,9 @@
 using HereticalSolutions.Collections;
 using HereticalSolutions.Collections.Managed;
 
-namespace HereticalSolutions.Messaging
+namespace HereticalSolutions.Messaging.Broadcasting
 {
-	public class Broadcaster<TValue>
+	public class Broadcaster<TValue> : IBroadcastable<TValue>
 	{
 		private INonAllocPool<BroadcasterSubscription<TValue>> subscriptionsPool;
 

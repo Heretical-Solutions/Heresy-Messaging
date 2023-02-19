@@ -6,17 +6,19 @@ using HereticalSolutions.Collections;
 using HereticalSolutions.Collections.Managed;
 using HereticalSolutions.Collections.Factories;
 
+using HereticalSolutions.Messaging.Pinging;
+
 namespace HereticalSolutions.Messaging.Factories
 {
-	public static class PubSubFactory
+	public static partial class MessagingFactory
 	{
-		public static Pinger BuildPinger()
+		public static IPingable BuildPingable()
 		{
 			Func<PingerSubscription> valueAllocationDelegate = () => { return null; };
 
-			var arrayPool = CollectionFactory.BuildPackedArrayPool<PingerSubscription>(
+			var arrayPool = CollectionsFactory.BuildPackedArrayPool<PingerSubscription>(
 				valueAllocationDelegate,
-				CollectionFactory.BuildIndexedContainer,
+				CollectionsFactory.BuildIndexedContainer,
 				new AllocationCommandDescriptor
 				{
 					Rule = EAllocationAmountRule.ZERO
@@ -26,11 +28,17 @@ namespace HereticalSolutions.Messaging.Factories
 					Rule = EAllocationAmountRule.DOUBLE_AMOUNT
 				});
 
-			var packedArray = ((IContentsRetrievable<IndexedPackedArray<PingerSubscription>>)arrayPool).Contents;
+			return BuildPinger(arrayPool);
+		}
 
+		public static Pinger BuildPinger(
+			INonAllocPool<PingerSubscription> pool)
+		{
+			var subscriptionsArray = ((IContentsRetrievable<IndexedPackedArray<PingerSubscription>>)pool).Contents;
+			
 			return new Pinger(
-				arrayPool,
-				packedArray);
+				pool,
+				subscriptionsArray);
 		}
 
 		public static Pinger BuildPinger(
