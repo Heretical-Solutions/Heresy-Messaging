@@ -5,20 +5,37 @@ namespace HereticalSolutions.Messaging
 {
     public interface IMessageSenderNonAlloc
     {
+        #region Pop
+        
         IMessageSenderNonAlloc PopMessage(Type messageType, out IPoolElement<IMessage> message);
 
-        IMessageSenderNonAlloc PopMessage<TMessage>(out IPoolElement<TMessage> message) where TMessage : IMessage;
+        IMessageSenderNonAlloc PopMessage<TMessage>(out IPoolElement<IMessage> message) where TMessage : IMessage;
         
-        IMessageSenderNonAlloc Write(IPoolElement<IMessage> message, params object[] args);
+        #endregion
+
+        #region Write
+        
+        IMessageSenderNonAlloc Write(IPoolElement<IMessage> message, object[] args);
+        //IMessageSenderNonAlloc Write(IPoolElement<IMessage> message, params object[] args);
+        
+        #endregion
+
+        #region Send
         
         void Send(IPoolElement<IMessage> message);
 
-        void Send<TMessage>(IPoolElement<TMessage> message) where TMessage : IMessage;
+        void Send<TMessage>(IPoolElement<IMessage> message) where TMessage : IMessage;
 
         void SendImmediately(IPoolElement<IMessage> message);
 
-        void SendImmediately<TMessage>(IPoolElement<TMessage> message) where TMessage : IMessage;
+        void SendImmediately<TMessage>(IPoolElement<IMessage> message) where TMessage : IMessage;
+        
+        #endregion
+
+        #region Deliver
         
         void DeliverMessagesInMailbox();
+        
+        #endregion
     }
 }

@@ -2,11 +2,11 @@ using System;
 
 namespace HereticalSolutions.Messaging
 {
-	public class BroadcasterSubscription<T>
+	public class BroadcastHandler<T>
 	{
 		private Action<T> @delegate;
 
-		public BroadcasterSubscription(Action<T> @delegate)
+		public BroadcastHandler(Action<T> @delegate)
 		{
 			this.@delegate = @delegate;
 		}

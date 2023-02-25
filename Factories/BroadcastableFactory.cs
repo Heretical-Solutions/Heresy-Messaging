@@ -12,9 +12,9 @@ namespace HereticalSolutions.Messaging.Factories
     {
         public static Broadcaster<T> BuildBroadcaster<T>()
         {
-            Func<BroadcasterSubscription<T>> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<BroadcasterSubscription<T>>;
+            Func<BroadcastHandler<T>> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<BroadcastHandler<T>>;
 
-            var subscriptionsPool = PoolsFactory.BuildResizableNonAllocPool<BroadcasterSubscription<T>>(
+            var subscriptionsPool = PoolsFactory.BuildResizableNonAllocPool<BroadcastHandler<T>>(
                 valueAllocationDelegate,
                 PoolsFactory.BuildIndexedContainer,
                 new AllocationCommandDescriptor
@@ -33,9 +33,9 @@ namespace HereticalSolutions.Messaging.Factories
             AllocationCommandDescriptor initial,
             AllocationCommandDescriptor additional)
         {
-            Func<BroadcasterSubscription<T>> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<BroadcasterSubscription<T>>;
+            Func<BroadcastHandler<T>> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<BroadcastHandler<T>>;
 
-            var subscriptionsPool = PoolsFactory.BuildResizableNonAllocPool<BroadcasterSubscription<T>>(
+            var subscriptionsPool = PoolsFactory.BuildResizableNonAllocPool<BroadcastHandler<T>>(
                 valueAllocationDelegate,
                 PoolsFactory.BuildIndexedContainer,
                 initial,
@@ -45,9 +45,9 @@ namespace HereticalSolutions.Messaging.Factories
         }
         
         public static Broadcaster<T> BuildBroadcaster<T>(
-            INonAllocPool<BroadcasterSubscription<T>> subscriptionsPool)
+            INonAllocPool<BroadcastHandler<T>> subscriptionsPool)
         {
-            var contents = ((IModifiable<INonAllocPool<BroadcasterSubscription<T>>>)subscriptionsPool).Contents;
+            var contents = ((IModifiable<INonAllocPool<BroadcastHandler<T>>>)subscriptionsPool).Contents;
 			
             return new Broadcaster<T>(
                 subscriptionsPool,

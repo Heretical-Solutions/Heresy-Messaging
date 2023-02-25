@@ -1,6 +1,6 @@
 namespace HereticalSolutions.Messaging
 {
-    public interface IBroadcastable<TValue> : IPoolSubscribable<BroadcasterSubscription<TValue>>
+    public interface IBroadcastable<TValue> : ISubscribableNonAlloc<BroadcastHandler<TValue>>
     {
         void Broadcast(TValue value);
     }

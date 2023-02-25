@@ -7,17 +7,17 @@ namespace HereticalSolutions.Messaging.Pinging
 	{
 		#region Subscriptions
 		
-		private INonAllocPool<PingerSubscription> subscriptionsPool;
+		private INonAllocPool<PingHandler> subscriptionsPool;
 
-		private IIndexable<IPoolElement<PingerSubscription>> indexableSubscriptions;
+		private IIndexable<IPoolElement<PingHandler>> subscriptionsAsIndexable;
 
-		private IFixedSizeCollection<IPoolElement<PingerSubscription>> subscriptionsWithCapacity;
+		private IFixedSizeCollection<IPoolElement<PingHandler>> subscriptionsWithCapacity;
 
 		#endregion
 		
 		#region Buffer
 
-		private PingerSubscription[] currentSubscriptionsBuffer;
+		private PingHandler[] currentSubscriptionsBuffer;
 
 		private int currentSubscriptionsBufferCount = -1;
 
@@ -26,40 +26,40 @@ namespace HereticalSolutions.Messaging.Pinging
 		private bool pingInProgress = false;
 
 		public Pinger(
-			INonAllocPool<PingerSubscription> subscriptionsPool,
-			INonAllocPool<PingerSubscription> subscriptionsContents)
+			INonAllocPool<PingHandler> subscriptionsPool,
+			INonAllocPool<PingHandler> subscriptionsContents)
 		{
 			this.subscriptionsPool = subscriptionsPool;
 
-			indexableSubscriptions = (IIndexable<IPoolElement<PingerSubscription>>)subscriptionsContents;
+			subscriptionsAsIndexable = (IIndexable<IPoolElement<PingHandler>>)subscriptionsContents;
 
 			subscriptionsWithCapacity =
-				(IFixedSizeCollection<IPoolElement<PingerSubscription>>)subscriptionsContents;
+				(IFixedSizeCollection<IPoolElement<PingHandler>>)subscriptionsContents;
 
-			currentSubscriptionsBuffer = new PingerSubscription[subscriptionsWithCapacity.Capacity];
+			currentSubscriptionsBuffer = new PingHandler[subscriptionsWithCapacity.Capacity];
 		}
 
 		#region IPoolSubscribable
 		
-		public IPoolElement<PingerSubscription> Subscribe(PingerSubscription subscription)
+		public IPoolElement<PingHandler> Subscribe(PingHandler handler)
 		{
 			var subscriptionElement = subscriptionsPool.Pop();
 
-			subscriptionElement.Value = subscription;
+			subscriptionElement.Value = handler;
 
 			return subscriptionElement;
 		}
 
-		public void Unsubscribe(IPoolElement<PingerSubscription> subscriptionElement)
+		public void Unsubscribe(IPoolElement<PingHandler> subscription)
 		{
-			TryUnsubscribeFromBuffer(subscriptionElement);
+			TryUnsubscribeFromBuffer(subscription);
 			
-			subscriptionElement.Value = null;
+			subscription.Value = null;
 
-			subscriptionsPool.Push(subscriptionElement);
+			subscriptionsPool.Push(subscription);
 		}
 
-		private void TryUnsubscribeFromBuffer(IPoolElement<PingerSubscription> subscriptionElement)
+		private void TryUnsubscribeFromBuffer(IPoolElement<PingHandler> subscriptionElement)
 		{
 			if (!pingInProgress)
 				return;
@@ -81,7 +81,7 @@ namespace HereticalSolutions.Messaging.Pinging
 		{
 			ValidateBufferSize();
 
-			currentSubscriptionsBufferCount = indexableSubscriptions.Count;
+			currentSubscriptionsBufferCount = subscriptionsAsIndexable.Count;
 
 			CopySubscriptionsToBuffer();
 
@@ -93,13 +93,13 @@ namespace HereticalSolutions.Messaging.Pinging
 		private void ValidateBufferSize()
 		{
 			if (currentSubscriptionsBuffer.Length < subscriptionsWithCapacity.Capacity)
-				currentSubscriptionsBuffer = new PingerSubscription[subscriptionsWithCapacity.Capacity];
+				currentSubscriptionsBuffer = new PingHandler[subscriptionsWithCapacity.Capacity];
 		}
 
 		private void CopySubscriptionsToBuffer()
 		{
 			for (int i = 0; i < currentSubscriptionsBufferCount; i++)
-				currentSubscriptionsBuffer[i] = indexableSubscriptions[i].Value;
+				currentSubscriptionsBuffer[i] = subscriptionsAsIndexable[i].Value;
 		}
 
 		private void HandleSubscriptions()

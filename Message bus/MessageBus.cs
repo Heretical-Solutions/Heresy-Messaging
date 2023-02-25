@@ -34,7 +34,140 @@ namespace HereticalSolutions.Messaging
             this.mailbox = mailbox;
         }
 
-        public IPoolElement<BroadcasterSubscription<TMessage>> SubscribeTo<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
+        #region IMessageSender
+
+        public IMessageSender PopMessage(Type messageType, out IMessage message)
+        {
+	        if (!messageRepository.TryGet(
+		            messageType,
+		            out IPool<IMessage> messagePool))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
+
+	        message = messagePool.Pop();
+
+	        return this;
+        }
+
+        public IMessageSender PopMessage<TMessage>(out IMessage message) where TMessage : IMessage
+        {
+	        if (!messageRepository.TryGet(
+		            typeof(TMessage),
+		            out IPool<IMessage> messagePool))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
+
+	        message = messagePool.Pop();
+
+	        return this;
+        }
+
+        IMessageSender IMessageSender.Write(IMessage message, object[] args)
+        {
+	        if (message == null)
+		        throw new Exception($"[MessageBus] INVALID MESSAGE");
+
+	        message.Write(args);
+
+	        return this;
+        }
+        
+        public void Send(IMessage message)
+        {
+	        mailbox.Enqueue(message);
+        }
+
+        /*
+        public void Send<TMessage>(IMessage message) where TMessage : IMessage
+        {
+	        mailbox.Enqueue(message);
+        }
+		*/
+        
+        public void SendImmediately(IMessage message)
+        {
+	        BroadcastMessage(message);
+
+	        PushMessageToPool(message);
+        }
+
+        /*
+        public void SendImmediately<TMessage>(TMessage message) where TMessage : IMessage
+        {
+	        broadcaster.Broadcast(message);
+
+	        PushMessage<TMessage>(message);
+        }
+        */
+        
+        public void DeliverMessagesInMailbox()
+        {
+	        int messagesToReceive = mailbox.Count;
+
+	        for (int i = 0; i < messagesToReceive; i++)
+	        {
+		        var message = mailbox.Dequeue();
+
+		        SendImmediately(message);
+	        }
+        }
+        
+        private void BroadcastMessage(IMessage message)
+        {
+	        var messageType = message.GetType();
+	        
+	        if (!broadcasterRepository.TryGet(
+		            messageType,
+		            out IBroadcastable<IMessage> broadcaster))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
+	        
+	        broadcaster.Broadcast(message);
+        }
+        
+        private void BroadcastMessage<TMessage>(TMessage message) where TMessage : IMessage
+        {
+	        var messageType = typeof(TMessage);
+	        
+	        if (!broadcasterRepository.TryGet(
+		            messageType,
+		            out IBroadcastable<IMessage> broadcaster))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
+	        
+	        broadcaster.Broadcast(message);
+        }
+        
+        private void PushMessageToPool(IMessage message)
+        {
+	        var messageType = message.GetType();
+
+	        if (!messageRepository.TryGet(
+		            messageType,
+		            out IPool<IMessage> messagePool))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
+
+	        messagePool.Push(message);
+        }
+
+        private void PushMessageToPool<TMessage>(TMessage message) where TMessage : IMessage
+        {
+	        var messageType = typeof(TMessage);
+	        
+	        if (!messageRepository.TryGet(
+		            messageType,
+		            out IPool<IMessage> messagePool))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
+
+	        messagePool.Push(message);
+        }
+
+        #endregion
+
+        #region IMessageReceiver
+        
+        public IPoolElement<BroadcastHandler<IMessage>> SubscribeTo(Type messageType, Action<IMessage> receiverDelegate)
+        {
+	        throw new NotImplementedException();
+        }
+
+        public IPoolElement<BroadcastHandler<IMessage>> SubscribeTo<TMessage>(Action<IMessage> receiverDelegate) where TMessage : IMessage
         {
 	        var messageType = typeof(TMessage);
 	        
@@ -43,111 +176,33 @@ namespace HereticalSolutions.Messaging
 		            out IBroadcastable<IMessage> broadcaster))
 		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
 
-	        var subscription = new BroadcasterSubscription<TMessage>(receiverDelegate);
+	        var subscription = new BroadcastHandler<TMessage>(receiverDelegate);
 	        
 	        var subscriptionPoolElement = broadcaster.Subscribe(subscription);
 
 	        return subscriptionPoolElement;
         }
 
+        public IPoolElement<BroadcastHandler<IMessage>> SubscribeToNonAlloc(Type messageType, BroadcastHandler<IMessage> subscription)
+        {
+	        throw new NotImplementedException();
+        }
+
+        public IPoolElement<BroadcastHandler<IMessage>> SubscribeToNonAlloc<TMessage>(BroadcastHandler<TMessage> subscription) where TMessage : IMessage
+        {
+	        throw new NotImplementedException();
+        }
+
+        public void UnsubscribeFrom<TMessage>(IPoolElement<BroadcastHandler<TMessage>> subscriptionPoolElement) where TMessage : IMessage
+        {
+	        throw new NotImplementedException();
+        }
+
         public void UnsubscribeFrom()
         {
 	        
         }
-
-        public IMessageSender PopMessage(Type messageType, out IMessage message)
-		{
-			if (!messageRepository.TryGet(
-				messageType,
-				out IPool<IMessage> messagePool))
-				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
-
-			message = messagePool.Pop();
-
-			return this;
-		}
-
-        public IMessageSender PopMessage<TMessage>(out TMessage message) where TMessage : IMessage
-        {
-            if (!messageRepository.TryGet(
-                typeof(TMessage),
-                out IPool<IMessage> messagePool))
-                throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
-
-            message = (TMessage)messagePool.Pop();
-
-            return this;
-        }
-
-		//public IMessageSender Write(IMessage message, params object[] args)
-		public IMessageSender Write(IMessage message, object[] args)
-		{
-			if (message == null)
-				throw new Exception($"[MessageBus] INVALID MESSAGE");
-
-			message.Write(args);
-
-			return this;
-		}
-
-        public void Send(IMessage message)
-        {
-            mailbox.Enqueue(message);
-        }
-
-		public void Send<TMessage>(TMessage message) where TMessage : IMessage
-		{
-			mailbox.Enqueue(message);
-		}
-
-        public void SendImmediately(IMessage message)
-        {
-            broadcaster.Broadcast(message);
-
-            PushMessage(message);
-        }
-
-		public void SendImmediately<TMessage>(TMessage message) where TMessage : IMessage
-		{
-			broadcaster.Broadcast(message);
-
-            PushMessage<TMessage>(message);
-		}
-
-		public void DeliverMessagesInMailbox()
-		{
-			int messagesToReceive = mailbox.Count;
-
-			for (int i = 0; i < messagesToReceive; i++)
-			{
-				var message = mailbox.Dequeue();
-
-				broadcaster.Broadcast(message);
-
-				PushMessage(message);
-			}
-		}
-
-        private void PushMessage(IMessage message)
-        {
-            var messageType = message.GetType();
-
-			if (!messageRepository.TryGet(
-				messageType,
-				out IPool<IMessage> messagePool))
-				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
-
-			messagePool.Push(message);
-        }
-
-		private void PushMessage<TMessage>(TMessage message) where TMessage : IMessage
-		{
-			if (!messageRepository.TryGet(
-				typeof(TMessage),
-				out IPool<IMessage> messagePool))
-				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
-
-			messagePool.Push(message);
-		}
+        
+        #endregion
     }
 }
