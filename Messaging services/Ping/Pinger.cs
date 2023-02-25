@@ -1,17 +1,20 @@
-using System;
 using HereticalSolutions.Collections;
-using HereticalSolutions.Collections.Managed;
+using HereticalSolutions.Pools;
 
 namespace HereticalSolutions.Messaging.Pinging
 {
 	public class Pinger : IPingable
 	{
+		#region Subscriptions
+		
 		private INonAllocPool<PingerSubscription> subscriptionsPool;
 
-		private IIndexable<IPoolElement<PingerSubscription>> subscriptionsArray;
+		private IIndexable<IPoolElement<PingerSubscription>> indexableSubscriptions;
 
-		private IndexedPackedArray<PingerSubscription> subscriptionsArray;
+		private IFixedSizeCollection<IPoolElement<PingerSubscription>> subscriptionsWithCapacity;
 
+		#endregion
+		
 		#region Buffer
 
 		private PingerSubscription[] currentSubscriptionsBuffer;
@@ -24,15 +27,20 @@ namespace HereticalSolutions.Messaging.Pinging
 
 		public Pinger(
 			INonAllocPool<PingerSubscription> subscriptionsPool,
-			IndexedPackedArray<PingerSubscription> subscriptionsArray)
+			INonAllocPool<PingerSubscription> subscriptionsContents)
 		{
 			this.subscriptionsPool = subscriptionsPool;
 
-			this.subscriptionsArray = subscriptionsArray;
+			indexableSubscriptions = (IIndexable<IPoolElement<PingerSubscription>>)subscriptionsContents;
 
-			currentSubscriptionsBuffer = new PingerSubscription[subscriptionsArray.Capacity];
+			subscriptionsWithCapacity =
+				(IFixedSizeCollection<IPoolElement<PingerSubscription>>)subscriptionsContents;
+
+			currentSubscriptionsBuffer = new PingerSubscription[subscriptionsWithCapacity.Capacity];
 		}
 
+		#region IPoolSubscribable
+		
 		public IPoolElement<PingerSubscription> Subscribe(PingerSubscription subscription)
 		{
 			var subscriptionElement = subscriptionsPool.Pop();
@@ -64,12 +72,16 @@ namespace HereticalSolutions.Messaging.Pinging
 					return;
 				}
 		}
+		
+		#endregion
 
+		#region IPingable
+		
 		public void Ping()
 		{
 			ValidateBufferSize();
 
-			currentSubscriptionsBufferCount = subscriptionsArray.Count;
+			currentSubscriptionsBufferCount = indexableSubscriptions.Count;
 
 			CopySubscriptionsToBuffer();
 
@@ -80,14 +92,14 @@ namespace HereticalSolutions.Messaging.Pinging
 
 		private void ValidateBufferSize()
 		{
-			if (currentSubscriptionsBuffer.Length < subscriptionsArray.Capacity)
-				currentSubscriptionsBuffer = new PingerSubscription[subscriptionsArray.Capacity];
+			if (currentSubscriptionsBuffer.Length < subscriptionsWithCapacity.Capacity)
+				currentSubscriptionsBuffer = new PingerSubscription[subscriptionsWithCapacity.Capacity];
 		}
 
 		private void CopySubscriptionsToBuffer()
 		{
 			for (int i = 0; i < currentSubscriptionsBufferCount; i++)
-				currentSubscriptionsBuffer[i] = subscriptionsArray[i].Value;
+				currentSubscriptionsBuffer[i] = indexableSubscriptions[i].Value;
 		}
 
 		private void HandleSubscriptions()
@@ -108,5 +120,7 @@ namespace HereticalSolutions.Messaging.Pinging
 			for (int i = 0; i < currentSubscriptionsBufferCount; i++)
 				currentSubscriptionsBuffer[i] = null;
 		}
+		
+		#endregion
 	}
 }
