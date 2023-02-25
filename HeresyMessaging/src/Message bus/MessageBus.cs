@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using HereticalSolutions.Collections;
+using HereticalSolutions.Pools;
 using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging

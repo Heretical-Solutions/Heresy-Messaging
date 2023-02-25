@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Dependencies/HeresyMemory/HeresyMemory/HeresyMemory.csproj" />
-    <ProjectReference Include="../Dependencies/HeresyRepositories/HeresyDatabasesAndRepositories/HeresyDatabasesAndRepositories.csproj" />
+    <ProjectReference Include="../../HeresyMemory/HeresyMemory/HeresyMemory.csproj" />
+    <ProjectReference Include="../../HeresyRepositories/HeresyDatabasesAndRepositories/HeresyDatabasesAndRepositories.csproj" />
   </ItemGroup>
   
 </Project>

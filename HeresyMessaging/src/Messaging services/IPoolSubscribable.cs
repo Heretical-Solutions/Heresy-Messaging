@@ -1,4 +1,4 @@
-using HereticalSolutions.Collections;
+using HereticalSolutions.Pools;
 
 namespace HereticalSolutions.Messaging
 {

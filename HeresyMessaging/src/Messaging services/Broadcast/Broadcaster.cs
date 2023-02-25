@@ -1,31 +1,46 @@
 using HereticalSolutions.Collections;
-using HereticalSolutions.Collections.Managed;
+using HereticalSolutions.Pools;
 
 namespace HereticalSolutions.Messaging.Broadcasting
 {
 	public class Broadcaster<TValue> : IBroadcastable<TValue>
 	{
+		#region Subscriptions
+		
 		private INonAllocPool<BroadcasterSubscription<TValue>> subscriptionsPool;
 
-		private IndexedPackedArray<BroadcasterSubscription<TValue>> subscriptionsArray;
+		private IIndexable<IPoolElement<BroadcasterSubscription<TValue>>> indexableSubscriptions;
+		
+		private IFixedSizeCollection<IPoolElement<BroadcasterSubscription<TValue>>> subscriptionsWithCapacity;
 
-		private BroadcasterSubscription<TValue>[] broadcastArray;
+		#endregion
+		
+		#region Buffer
+		
+		private BroadcasterSubscription<TValue>[] currentSubscriptionsBuffer;
 
-		private int broadcastCount = -1;
+		private int currentSubscriptionsBufferCount = -1;
 
+		#endregion
+		
 		private bool broadcastInProgress = false;
 
 		public Broadcaster(
 			INonAllocPool<BroadcasterSubscription<TValue>> subscriptionsPool,
-			IndexedPackedArray<BroadcasterSubscription<TValue>> subscriptionsArray)
+			INonAllocPool<BroadcasterSubscription<TValue>> subscriptionsContents)
 		{
 			this.subscriptionsPool = subscriptionsPool;
 
-			this.subscriptionsArray = subscriptionsArray;
+			indexableSubscriptions = (IIndexable<IPoolElement<BroadcasterSubscription<TValue>>>)subscriptionsContents;
 
-			broadcastArray = new BroadcasterSubscription<TValue>[subscriptionsArray.Capacity];
+			subscriptionsWithCapacity =
+				(IFixedSizeCollection<IPoolElement<BroadcasterSubscription<TValue>>>)subscriptionsContents;
+
+			currentSubscriptionsBuffer = new BroadcasterSubscription<TValue>[subscriptionsWithCapacity.Capacity];
 		}
 
+		#region IPoolSubscribable
+		
 		public IPoolElement<BroadcasterSubscription<TValue>> Subscribe(BroadcasterSubscription<TValue> subscription)
 		{
 			var subscriptionElement = subscriptionsPool.Pop();
@@ -37,44 +52,75 @@ namespace HereticalSolutions.Messaging.Broadcasting
 
 		public void Unsubscribe(IPoolElement<BroadcasterSubscription<TValue>> subscriptionElement)
 		{
-			if (broadcastInProgress)
-			{
-				for (int i = 0; i < broadcastCount; i++)
-					if (broadcastArray[i] == subscriptionElement.Value)
-					{
-						broadcastArray[i] = null;
-
-						break;
-					}
-			}
+			TryUnsubscribeFromBuffer(subscriptionElement);
 
 			subscriptionElement.Value = null;
 
 			subscriptionsPool.Push(subscriptionElement);
 		}
+		
+		private void TryUnsubscribeFromBuffer(IPoolElement<BroadcasterSubscription<TValue>> subscriptionElement)
+		{
+			if (!broadcastInProgress)
+				return;
+				
+			for (int i = 0; i < currentSubscriptionsBufferCount; i++)
+				if (currentSubscriptionsBuffer[i] == subscriptionElement.Value)
+				{
+					currentSubscriptionsBuffer[i] = null;
 
+					return;
+				}
+		}
+		
+		#endregion
+
+		#region IBroadcastable
+		
 		public void Broadcast(TValue value)
 		{
-			if (broadcastArray.Length < subscriptionsArray.Capacity)
-				broadcastArray = new BroadcasterSubscription<TValue>[subscriptionsArray.Capacity];
+			ValidateBufferSize();
 
-			broadcastCount = subscriptionsArray.Count;
+			currentSubscriptionsBufferCount = indexableSubscriptions.Count;
 
-			for (int i = 0; i < broadcastCount; i++)
-				broadcastArray[i] = subscriptionsArray[i].Value;
+			CopySubscriptionsToBuffer();
 
+			HandleSubscriptions(value);
+
+			EmptyBuffer();
+		}
+		
+		private void ValidateBufferSize()
+		{
+			if (currentSubscriptionsBuffer.Length < subscriptionsWithCapacity.Capacity)
+				currentSubscriptionsBuffer = new BroadcasterSubscription<TValue>[subscriptionsWithCapacity.Capacity];
+		}
+
+		private void CopySubscriptionsToBuffer()
+		{
+			for (int i = 0; i < currentSubscriptionsBufferCount; i++)
+				currentSubscriptionsBuffer[i] = indexableSubscriptions[i].Value;
+		}
+
+		private void HandleSubscriptions(TValue value)
+		{
 			broadcastInProgress = true;
 
-			for (int i = 0; i < broadcastCount; i++)
+			for (int i = 0; i < currentSubscriptionsBufferCount; i++)
 			{
-				if (broadcastArray[i] != null)
-					broadcastArray[i].Handle(value);
+				if (currentSubscriptionsBuffer[i] != null)
+					currentSubscriptionsBuffer[i].Handle(value);
 			}
 
 			broadcastInProgress = false;
-
-			for (int i = 0; i < broadcastCount; i++)
-				broadcastArray[i] = null;
 		}
+
+		private void EmptyBuffer()
+		{
+			for (int i = 0; i < currentSubscriptionsBufferCount; i++)
+				currentSubscriptionsBuffer[i] = null;
+		}
+		
+		#endregion
 	}
 }
