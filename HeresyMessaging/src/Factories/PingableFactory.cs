@@ -14,9 +14,9 @@ namespace HereticalSolutions.Messaging.Factories
 		
 		public static IPingable BuildPingable()
 		{
-			Func<PingerSubscription> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<PingerSubscription>;
+			Func<PingHandler> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<PingHandler>;
 
-			var subscriptionsPool = PoolsFactory.BuildResizableNonAllocPool<PingerSubscription>(
+			var subscriptionsPool = PoolsFactory.BuildResizableNonAllocPool<PingHandler>(
 				valueAllocationDelegate,
 				PoolsFactory.BuildIndexedContainer,
 				new AllocationCommandDescriptor
@@ -35,9 +35,9 @@ namespace HereticalSolutions.Messaging.Factories
 			AllocationCommandDescriptor initial,
 			AllocationCommandDescriptor additional)
 		{
-			Func<PingerSubscription> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<PingerSubscription>;
+			Func<PingHandler> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<PingHandler>;
 
-			var subscriptionsPool = PoolsFactory.BuildResizableNonAllocPool<PingerSubscription>(
+			var subscriptionsPool = PoolsFactory.BuildResizableNonAllocPool<PingHandler>(
 				valueAllocationDelegate,
 				PoolsFactory.BuildIndexedContainer,
 				initial,
@@ -47,9 +47,9 @@ namespace HereticalSolutions.Messaging.Factories
 		}
 		
 		public static Pinger BuildPinger(
-			INonAllocPool<PingerSubscription> subscriptionsPool)
+			INonAllocPool<PingHandler> subscriptionsPool)
 		{
-			var contents = ((IModifiable<INonAllocPool<PingerSubscription>>)subscriptionsPool).Contents;
+			var contents = ((IModifiable<INonAllocPool<PingHandler>>)subscriptionsPool).Contents;
 			
 			return new Pinger(
 				subscriptionsPool,

@@ -2,11 +2,11 @@ using System;
 
 namespace HereticalSolutions.Messaging
 {
-	public class PingerSubscription
+	public class PingHandler
 	{
 		private Action @delegate;
 
-		public PingerSubscription(Action @delegate)
+		public PingHandler(Action @delegate)
 		{
 			this.@delegate = @delegate;
 		}

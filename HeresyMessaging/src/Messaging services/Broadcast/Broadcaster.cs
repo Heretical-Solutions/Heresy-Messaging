@@ -7,17 +7,17 @@ namespace HereticalSolutions.Messaging.Broadcasting
 	{
 		#region Subscriptions
 		
-		private INonAllocPool<BroadcasterSubscription<TValue>> subscriptionsPool;
+		private INonAllocPool<BroadcastHandler<TValue>> subscriptionsPool;
 
-		private IIndexable<IPoolElement<BroadcasterSubscription<TValue>>> indexableSubscriptions;
+		private IIndexable<IPoolElement<BroadcastHandler<TValue>>> subscriptionsAsIndexable;
 		
-		private IFixedSizeCollection<IPoolElement<BroadcasterSubscription<TValue>>> subscriptionsWithCapacity;
+		private IFixedSizeCollection<IPoolElement<BroadcastHandler<TValue>>> subscriptionsWithCapacity;
 
 		#endregion
 		
 		#region Buffer
 		
-		private BroadcasterSubscription<TValue>[] currentSubscriptionsBuffer;
+		private BroadcastHandler<TValue>[] currentSubscriptionsBuffer;
 
 		private int currentSubscriptionsBufferCount = -1;
 
@@ -26,40 +26,40 @@ namespace HereticalSolutions.Messaging.Broadcasting
 		private bool broadcastInProgress = false;
 
 		public Broadcaster(
-			INonAllocPool<BroadcasterSubscription<TValue>> subscriptionsPool,
-			INonAllocPool<BroadcasterSubscription<TValue>> subscriptionsContents)
+			INonAllocPool<BroadcastHandler<TValue>> subscriptionsPool,
+			INonAllocPool<BroadcastHandler<TValue>> subscriptionsContents)
 		{
 			this.subscriptionsPool = subscriptionsPool;
 
-			indexableSubscriptions = (IIndexable<IPoolElement<BroadcasterSubscription<TValue>>>)subscriptionsContents;
+			subscriptionsAsIndexable = (IIndexable<IPoolElement<BroadcastHandler<TValue>>>)subscriptionsContents;
 
 			subscriptionsWithCapacity =
-				(IFixedSizeCollection<IPoolElement<BroadcasterSubscription<TValue>>>)subscriptionsContents;
+				(IFixedSizeCollection<IPoolElement<BroadcastHandler<TValue>>>)subscriptionsContents;
 
-			currentSubscriptionsBuffer = new BroadcasterSubscription<TValue>[subscriptionsWithCapacity.Capacity];
+			currentSubscriptionsBuffer = new BroadcastHandler<TValue>[subscriptionsWithCapacity.Capacity];
 		}
 
 		#region IPoolSubscribable
 		
-		public IPoolElement<BroadcasterSubscription<TValue>> Subscribe(BroadcasterSubscription<TValue> subscription)
+		public IPoolElement<BroadcastHandler<TValue>> Subscribe(BroadcastHandler<TValue> handler)
 		{
 			var subscriptionElement = subscriptionsPool.Pop();
 
-			subscriptionElement.Value = subscription;
+			subscriptionElement.Value = handler;
 
 			return subscriptionElement;
 		}
 
-		public void Unsubscribe(IPoolElement<BroadcasterSubscription<TValue>> subscriptionElement)
+		public void Unsubscribe(IPoolElement<BroadcastHandler<TValue>> subscription)
 		{
-			TryUnsubscribeFromBuffer(subscriptionElement);
+			TryUnsubscribeFromBuffer(subscription);
 
-			subscriptionElement.Value = null;
+			subscription.Value = null;
 
-			subscriptionsPool.Push(subscriptionElement);
+			subscriptionsPool.Push(subscription);
 		}
 		
-		private void TryUnsubscribeFromBuffer(IPoolElement<BroadcasterSubscription<TValue>> subscriptionElement)
+		private void TryUnsubscribeFromBuffer(IPoolElement<BroadcastHandler<TValue>> subscriptionElement)
 		{
 			if (!broadcastInProgress)
 				return;
@@ -81,7 +81,7 @@ namespace HereticalSolutions.Messaging.Broadcasting
 		{
 			ValidateBufferSize();
 
-			currentSubscriptionsBufferCount = indexableSubscriptions.Count;
+			currentSubscriptionsBufferCount = subscriptionsAsIndexable.Count;
 
 			CopySubscriptionsToBuffer();
 
@@ -93,13 +93,13 @@ namespace HereticalSolutions.Messaging.Broadcasting
 		private void ValidateBufferSize()
 		{
 			if (currentSubscriptionsBuffer.Length < subscriptionsWithCapacity.Capacity)
-				currentSubscriptionsBuffer = new BroadcasterSubscription<TValue>[subscriptionsWithCapacity.Capacity];
+				currentSubscriptionsBuffer = new BroadcastHandler<TValue>[subscriptionsWithCapacity.Capacity];
 		}
 
 		private void CopySubscriptionsToBuffer()
 		{
 			for (int i = 0; i < currentSubscriptionsBufferCount; i++)
-				currentSubscriptionsBuffer[i] = indexableSubscriptions[i].Value;
+				currentSubscriptionsBuffer[i] = subscriptionsAsIndexable[i].Value;
 		}
 
 		private void HandleSubscriptions(TValue value)

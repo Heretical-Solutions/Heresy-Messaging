@@ -1,6 +1,6 @@
 namespace HereticalSolutions.Messaging
 {
-    public interface IPingable : IPoolSubscribable<PingerSubscription>
+    public interface IPingable : ISubscribableNonAlloc<PingHandler>
     {
         void Ping();
     }

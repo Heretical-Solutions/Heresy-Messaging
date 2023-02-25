@@ -34,7 +34,7 @@ namespace HereticalSolutions.Messaging
             this.mailbox = mailbox;
         }
 
-        public IPoolElement<BroadcasterSubscription<TMessage>> SubscribeTo<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
+        public IPoolElement<BroadcastHandler<TMessage>> SubscribeTo<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
         {
 	        var subscription = 
 	        
