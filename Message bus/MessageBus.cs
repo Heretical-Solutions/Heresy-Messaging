@@ -16,7 +16,7 @@ namespace HereticalSolutions.Messaging
         : IMessageSender, 
 	      IMessageReceiver
     {
-        private IRepository<Type, IBroadcastable<IMessage>> broadcasterRepository;
+	    private IRepository<Type, IBroadcastable<IMessage>> broadcasterRepository;
 
         private IRepository<Type, IPool<IMessage>> messageRepository;
 
@@ -119,7 +119,7 @@ namespace HereticalSolutions.Messaging
 		            out IBroadcastable<IMessage> broadcaster))
 		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
 	        
-	        broadcaster.Broadcast(message);
+	        broadcaster.Broadcast<IMessage>(message);
         }
         
         private void BroadcastMessage<TMessage>(TMessage message) where TMessage : IMessage
