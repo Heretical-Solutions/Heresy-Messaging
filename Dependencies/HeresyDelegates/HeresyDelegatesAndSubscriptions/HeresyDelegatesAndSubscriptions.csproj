@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net4.7</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="src\Interfaces" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Dependencies/HeresyRepositories/HeresyDatabasesAndRepositories/HeresyDatabasesAndRepositories.csproj" />
+    <ProjectReference Include="../Dependencies/HeresyPools/HeresyPools/HeresyPools.csproj" />
+  </ItemGroup>
+
+</Project>
