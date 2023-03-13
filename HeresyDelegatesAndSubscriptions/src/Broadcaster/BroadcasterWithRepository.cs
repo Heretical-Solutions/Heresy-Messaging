@@ -30,6 +30,20 @@ namespace HereticalSolutions.Delegates.Broadcasting
             
             broadcaster.Publish(value);
         }
+        
+        public void Publish(Type valueType, object value)
+        {
+            var messageType = valueType;
+            
+            if (!broadcasterRepository.TryGet(
+                    messageType,
+                    out object broadcasterObject))
+                return;
+
+            var broadcaster = (IPublisherSingleArg)broadcasterObject;
+            
+            broadcaster.Publish(value);
+        }
 
         #endregion
 

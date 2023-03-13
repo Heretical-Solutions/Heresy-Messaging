@@ -6,6 +6,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
 {
 	public class NonAllocBroadcasterGeneric<TValue>
 		: IPublisherSingleArgGeneric<TValue>,
+		  IPublisherSingleArg,
 		  INonAllocSubscribableSingleArgGeneric<TValue>
 	{
 		#region Subscriptions
@@ -95,15 +96,6 @@ namespace HereticalSolutions.Delegates.Broadcasting
 			subscription.Terminate();
 		}
 
-		public void Unsubscribe(IPoolElement<IInvokableSingleArgGeneric<TValue>> subscription)
-		{
-			TryRemoveFromBuffer(subscription);
-			
-			subscription.Value = null;
-
-			subscriptionsPool.Push(subscription);
-		}
-
 		private void TryRemoveFromBuffer(IPoolElement<IInvokableSingleArgGeneric<TValue>> subscriptionElement)
 		{
 			if (!broadcastInProgress)
@@ -133,6 +125,27 @@ namespace HereticalSolutions.Delegates.Broadcasting
 			InvokeSubscriptions(value);
 
 			EmptyBuffer();
+		}
+
+		public void Publish(object value)
+		{
+			Publish((TValue)value);
+		}
+		
+		public void Publish<TArgument>(TArgument value)
+		{
+			if (typeof(TArgument) != typeof(TValue))
+				throw new Exception($"[BroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{typeof(TArgument).ToString()}\"");
+			
+			Publish((object)value); //It doesn't want to convert TArgument into TValue. Bastard
+		}
+
+		public void Publish(Type valueType, object value)
+		{
+			if (valueType != typeof(TValue))
+				throw new Exception($"[BroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{valueType.ToString()}\"");
+			
+			Publish(value); //It doesn't want to convert TArgument into TValue. Bastard
 		}
 
 		private void ValidateBufferSize()

@@ -15,5 +15,10 @@ namespace HereticalSolutions.Delegates.Wrappers
         {
             @delegate?.Invoke(argument);
         }
+
+        public void Invoke(object argument)
+        {
+            @delegate?.Invoke((TValue)argument);
+        }
     }
 }

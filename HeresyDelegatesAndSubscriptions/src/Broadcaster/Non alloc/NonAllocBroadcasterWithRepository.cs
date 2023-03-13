@@ -1,3 +1,4 @@
+using System;
 using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Delegates.Broadcasting
@@ -25,6 +26,20 @@ namespace HereticalSolutions.Delegates.Broadcasting
                 return;
 
             var broadcaster = (IPublisherSingleArgGeneric<TValue>)broadcasterObject;
+            
+            broadcaster.Publish(value);
+        }
+        
+        public void Publish(Type valueType, object value)
+        {
+            var messageType = valueType;
+            
+            if (!broadcasterRepository.TryGet(
+                    messageType,
+                    out object broadcasterObject))
+                return;
+
+            var broadcaster = (IPublisherSingleArg)broadcasterObject;
             
             broadcaster.Publish(value);
         }
