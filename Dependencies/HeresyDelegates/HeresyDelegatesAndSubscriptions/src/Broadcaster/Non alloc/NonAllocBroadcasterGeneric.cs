@@ -131,22 +131,6 @@ namespace HereticalSolutions.Delegates.Broadcasting
 		{
 			Publish((TValue)value);
 		}
-		
-		public void Publish<TArgument>(TArgument value)
-		{
-			if (typeof(TArgument) != typeof(TValue))
-				throw new Exception($"[BroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{typeof(TArgument).ToString()}\"");
-			
-			Publish((object)value); //It doesn't want to convert TArgument into TValue. Bastard
-		}
-
-		public void Publish(Type valueType, object value)
-		{
-			if (valueType != typeof(TValue))
-				throw new Exception($"[BroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{valueType.ToString()}\"");
-			
-			Publish(value); //It doesn't want to convert TArgument into TValue. Bastard
-		}
 
 		private void ValidateBufferSize()
 		{
@@ -177,6 +161,26 @@ namespace HereticalSolutions.Delegates.Broadcasting
 		{
 			for (int i = 0; i < currentSubscriptionsBufferCount; i++)
 				currentSubscriptionsBuffer[i] = null;
+		}
+		
+		#endregion
+		
+		#region IPublisherSingleArg
+		
+		public void Publish<TArgument>(TArgument value)
+		{
+			if (!(typeof(TArgument).Equals(typeof(TValue))))
+				throw new Exception($"[NonAllocBroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{typeof(TArgument).ToString()}\"");
+			
+			Publish((object)value); //It doesn't want to convert TArgument into TValue. Bastard
+		}
+
+		public void Publish(Type valueType, object value)
+		{
+			if (!(valueType.Equals(typeof(TValue))))
+				throw new Exception($"[NonAllocBroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{valueType.ToString()}\"");
+			
+			Publish(value); //It doesn't want to convert TArgument into TValue. Bastard
 		}
 		
 		#endregion

@@ -62,6 +62,20 @@ namespace HereticalSolutions.Delegates.Broadcasting
             broadcaster.Subscribe(subscription);
         }
 
+        public void Subscribe(Type valueType, ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg> subscription)
+        {
+            var messageType = valueType;
+            
+            if (!broadcasterRepository.TryGet(
+                    messageType,
+                    out object broadcasterObject))
+                return;
+
+            var broadcaster = (INonAllocSubscribableSingleArg)broadcasterObject;
+            
+            broadcaster.Subscribe(messageType, subscription);
+        }
+
         public void Unsubscribe<TValue>(ISubscriptionHandler<INonAllocSubscribableSingleArgGeneric<TValue>, IInvokableSingleArgGeneric<TValue>> subscription)
         {
             var messageType = typeof(TValue);
@@ -74,6 +88,20 @@ namespace HereticalSolutions.Delegates.Broadcasting
             var broadcaster = (INonAllocSubscribableSingleArgGeneric<TValue>)broadcasterObject;
             
             broadcaster.Unsubscribe(subscription);
+        }
+
+        public void Unsubscribe(Type valueType, ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg> subscription)
+        {
+            var messageType = valueType;
+            
+            if (!broadcasterRepository.TryGet(
+                    messageType,
+                    out object broadcasterObject))
+                return;
+
+            var broadcaster = (INonAllocSubscribableSingleArg)broadcasterObject;
+            
+            broadcaster.Unsubscribe(messageType, subscription);
         }
 
         #endregion
