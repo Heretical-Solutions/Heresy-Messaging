@@ -5,16 +5,9 @@ using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging
 {
-    //TODO:
-    //Right now message bus is in broadcast mode
-    //To send messages to particular recepients (i.e. how Defold does it) I plan on adding the following:
-    //1. IMessage shall contain a 'header' with EMessageDestination enum (UNICAST, BROADCAST) and a recepient address string
-    //2. Message buses shall additionally contain a pool of IMessageBroker's for kinda 'personal mailboxes'
-    //3. To resolve recepients on addressed messages I shall add a trie (prefix tree) with early return option
-    //   i.e. if address is "Entities/Entity 12" and there is only one node behind starting E then it performs full string comparison with the node and sends it the message
     public class MessageBusNonAlloc
         : IMessageSenderNonAlloc, 
-	      IMessageReceiver
+	      IMessageReceiverNonAlloc
     {
         private IBroadcastable<IMessage> broadcaster;
 

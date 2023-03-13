@@ -1,19 +1,15 @@
 using System;
 
-using HereticalSolutions.Pools;
-
 namespace HereticalSolutions.Messaging
 {
 	public interface IMessageReceiver
 	{
-		IPoolElement<BroadcastHandler<IMessage>> SubscribeTo(Type messageType, Action<IMessage> receiverDelegate);
+		void SubscribeTo<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage;
 		
-		IPoolElement<BroadcastHandler<IMessage>> SubscribeTo<TMessage>(Action<IMessage> receiverDelegate) where TMessage : IMessage;
+		void SubscribeTo(Type messageType, object receiverDelegate);
 
-		IPoolElement<BroadcastHandler<IMessage>> SubscribeToNonAlloc(Type messageType, BroadcastHandler<IMessage> subscription);
+		void UnsubscribeFrom<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage;
 		
-		IPoolElement<BroadcastHandler<IMessage>> SubscribeToNonAlloc<TMessage>(BroadcastHandler<TMessage> subscription) where TMessage : IMessage;
-
-		void UnsubscribeFrom<TMessage>(IPoolElement<BroadcastHandler<TMessage>> subscriptionPoolElement) where TMessage : IMessage;
+		void UnsubscribeFrom(Type messageType, object receiverDelegate);
 	}
 }
