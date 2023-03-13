@@ -4,7 +4,7 @@ using HereticalSolutions.Delegates;
 
 namespace HereticalSolutions.Messaging
 {
-    public interface IMessageReceiverNonAlloc
+    public interface INonAllocMessageReceiver
     {
         void SubscribeTo<TMessage>(ISubscriptionHandler<INonAllocSubscribableSingleArgGeneric<TMessage>, IInvokableSingleArgGeneric<TMessage>> subscription) where TMessage : IMessage;
         

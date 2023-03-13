@@ -4,21 +4,21 @@ using HereticalSolutions.Pools;
 
 namespace HereticalSolutions.Messaging
 {
-    public interface IMessageSenderNonAlloc
+    public interface INonAllocMessageSender
     {
         #region Pop
         
-        IMessageSenderNonAlloc PopMessage(Type messageType, out IPoolElement<IMessage> message);
+        INonAllocMessageSender PopMessage(Type messageType, out IPoolElement<IMessage> message);
 
-        IMessageSenderNonAlloc PopMessage<TMessage>(out IPoolElement<IMessage> message) where TMessage : IMessage;
+        INonAllocMessageSender PopMessage<TMessage>(out IPoolElement<IMessage> message) where TMessage : IMessage;
         
         #endregion
 
         #region Write
         
-        IMessageSenderNonAlloc Write(IPoolElement<IMessage> message, object[] args);
+        INonAllocMessageSender Write(IPoolElement<IMessage> message, object[] args);
         
-        IMessageSenderNonAlloc Write<TMessage>(IPoolElement<IMessage> message, object[] args) where TMessage : IMessage;
+        INonAllocMessageSender Write<TMessage>(IPoolElement<IMessage> message, object[] args) where TMessage : IMessage;
         
         #endregion
 

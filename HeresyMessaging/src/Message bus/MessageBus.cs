@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+
 using HereticalSolutions.Delegates.Broadcasting;
+
 using HereticalSolutions.Pools;
+
 using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging
