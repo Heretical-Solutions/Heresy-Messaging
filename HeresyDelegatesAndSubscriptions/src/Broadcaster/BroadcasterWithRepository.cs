@@ -63,6 +63,20 @@ namespace HereticalSolutions.Delegates.Broadcasting
             broadcaster.Subscribe(@delegate);
         }
 
+        public void Subscribe(Type valueType, object @delegate)
+        {
+            var messageType = valueType;
+            
+            if (!broadcasterRepository.TryGet(
+                    messageType,
+                    out object broadcasterObject))
+                return;
+
+            var broadcaster = (ISubscribableSingleArg)broadcasterObject;
+            
+            broadcaster.Subscribe(valueType, @delegate);
+        }
+
         public void Unsubscribe<TValue>(Action<TValue> @delegate)
         {
             var messageType = typeof(TValue);
@@ -75,6 +89,20 @@ namespace HereticalSolutions.Delegates.Broadcasting
             var broadcaster = (ISubscribableSingleArgGeneric<TValue>)broadcasterObject;
             
             broadcaster.Unsubscribe(@delegate);
+        }
+
+        public void Unsubscribe(Type valueType, object @delegate)
+        {
+            var messageType = valueType;
+            
+            if (!broadcasterRepository.TryGet(
+                    messageType,
+                    out object broadcasterObject))
+                return;
+
+            var broadcaster = (ISubscribableSingleArg)broadcasterObject;
+            
+            broadcaster.Unsubscribe(valueType, @delegate);
         }
 
         #endregion
