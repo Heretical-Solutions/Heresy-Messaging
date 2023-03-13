@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using HereticalSolutions.Delegates.Broadcasting;
 using HereticalSolutions.Pools;
 using HereticalSolutions.Repositories;
 
@@ -16,18 +17,18 @@ namespace HereticalSolutions.Messaging
         : IMessageSender, 
 	      IMessageReceiver
     {
-	    private IRepository<Type, IBroadcastable<IMessage>> broadcasterRepository;
+	    private BroadcasterWithRepository broadcaster;
 
-        private IRepository<Type, IPool<IMessage>> messageRepository;
+        private IReadOnlyObjectRepository messageRepository;
 
         private Queue<IMessage> mailbox;
 
         public MessageBus(
-	        IRepository<Type, IBroadcastable<IMessage>> broadcasterRepository,
-			IRepository<Type, IPool<IMessage>> messageRepository,
+	        BroadcasterWithRepository broadcaster,
+	        IReadOnlyObjectRepository messageRepository,
 			Queue<IMessage> mailbox)
         {
-            this.broadcasterRepository = broadcasterRepository;
+            this.broadcaster = broadcaster;
 
             this.messageRepository = messageRepository;
 
@@ -40,27 +41,31 @@ namespace HereticalSolutions.Messaging
         {
 	        if (!messageRepository.TryGet(
 		            messageType,
-		            out IPool<IMessage> messagePool))
+		            out object messagePoolObject))
 		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
 
+	        IPool<IMessage> messagePool = (IPool<IMessage>)messagePoolObject;
+	        
 	        message = messagePool.Pop();
 
 	        return this;
         }
 
-        public IMessageSender PopMessage<TMessage>(out IMessage message) where TMessage : IMessage
+        public IMessageSender PopMessage<TMessage>(out TMessage message) where TMessage : IMessage
         {
 	        if (!messageRepository.TryGet(
 		            typeof(TMessage),
-		            out IPool<IMessage> messagePool))
+		            out object messagePoolObject))
 		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
 
-	        message = messagePool.Pop();
+	        IPool<IMessage> messagePool = (IPool<IMessage>)messagePoolObject;
+	        
+	        message = (TMessage)messagePool.Pop();
 
 	        return this;
         }
 
-        IMessageSender IMessageSender.Write(IMessage message, object[] args)
+        public IMessageSender Write(IMessage message, object[] args)
         {
 	        if (message == null)
 		        throw new Exception($"[MessageBus] INVALID MESSAGE");
@@ -69,34 +74,40 @@ namespace HereticalSolutions.Messaging
 
 	        return this;
         }
-        
+
+        public IMessageSender Write<TMessage>(TMessage message, object[] args) where TMessage : IMessage
+        {
+	        if (message == null)
+		        throw new Exception($"[MessageBus] INVALID MESSAGE");
+
+	        message.Write(args);
+
+	        return this;
+        }
+
         public void Send(IMessage message)
         {
 	        mailbox.Enqueue(message);
         }
-
-        /*
+        
         public void Send<TMessage>(IMessage message) where TMessage : IMessage
         {
 	        mailbox.Enqueue(message);
         }
-		*/
-        
+
         public void SendImmediately(IMessage message)
         {
 	        BroadcastMessage(message);
 
 	        PushMessageToPool(message);
         }
-
-        /*
+        
         public void SendImmediately<TMessage>(TMessage message) where TMessage : IMessage
         {
-	        broadcaster.Broadcast(message);
+	        broadcaster.Publish<TMessage>(message);
 
 	        PushMessage<TMessage>(message);
         }
-        */
         
         public void DeliverMessagesInMailbox()
         {
@@ -112,21 +123,14 @@ namespace HereticalSolutions.Messaging
         
         private void BroadcastMessage(IMessage message)
         {
-	        var messageType = message.GetType();
-	        
-	        if (!broadcasterRepository.TryGet(
-		            messageType,
-		            out IBroadcastable<IMessage> broadcaster))
-		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
-	        
-	        broadcaster.Broadcast<IMessage>(message);
+	        broadcaster.Publish(message);
         }
         
         private void BroadcastMessage<TMessage>(TMessage message) where TMessage : IMessage
         {
 	        var messageType = typeof(TMessage);
 	        
-	        if (!broadcasterRepository.TryGet(
+	        if (!this.broadcaster.TryGet(
 		            messageType,
 		            out IBroadcastable<IMessage> broadcaster))
 		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
@@ -171,7 +175,7 @@ namespace HereticalSolutions.Messaging
         {
 	        var messageType = typeof(TMessage);
 	        
-	        if (!broadcasterRepository.TryGet(
+	        if (!this.broadcaster.TryGet(
 		            messageType,
 		            out IBroadcastable<IMessage> broadcaster))
 		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");

@@ -9,8 +9,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Dependencies/HeresyRepositories/HeresyDatabasesAndRepositories/HeresyDatabasesAndRepositories.csproj" />
-    <ProjectReference Include="../Dependencies/HeresyPools/HeresyPools/HeresyPools.csproj" />
+    <ProjectReference Include="../../HeresyRepositories/HeresyDatabasesAndRepositories/HeresyDatabasesAndRepositories.csproj" />
+    <ProjectReference Include="../../HeresyPools/HeresyPools/HeresyPools.csproj" />
   </ItemGroup>
 
 </Project>
