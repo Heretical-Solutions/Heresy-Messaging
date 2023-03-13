@@ -15,7 +15,6 @@ namespace HereticalSolutions.Messaging
         #region Write
         
         IMessageSender Write(IMessage message, object[] args);
-        //IMessageSender Write(IMessage message, params object[] args);
         
         IMessageSender Write<TMessage>(TMessage message, object[] args) where TMessage : IMessage;
         

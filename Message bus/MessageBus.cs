@@ -98,11 +98,6 @@ namespace HereticalSolutions.Messaging
 	        mailbox.Enqueue(message);
         }
 
-        public void Send<TMessage>(IMessage message) where TMessage : IMessage
-        {
-	        mailbox.Enqueue(message);
-        }
-
         public void SendImmediately(IMessage message)
         {
 	        broadcaster.Publish(message.GetType(), message);
