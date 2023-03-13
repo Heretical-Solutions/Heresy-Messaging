@@ -1,52 +1,21 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyMessaging", "HeresyMessaging\HeresyMessaging.csproj", "{883620F8-1A76-4D50-82EA-CE7F33A1C3FF}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{d39fb7e7-0814-24ea-0774-c8845565e793}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyDatabasesAndRepositories", "Dependencies\HeresyRepositories\HeresyDatabasesAndRepositories\HeresyDatabasesAndRepositories.csproj", "{64E50172-676B-4830-AC7F-13B810F58726}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyPools", "Dependencies\HeresyPools\HeresyPools\HeresyPools.csproj", "{76E778EF-6BAF-4661-AF5D-940F9D904ACC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyMemory", "Dependencies\HeresyMemory\HeresyMemory\HeresyMemory.csproj", "{98836BB6-FA47-453D-93A0-7EF339E0E898}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyDelegatesAndSubscriptions", "Dependencies\HeresyDelegates\HeresyDelegatesAndSubscriptions\HeresyDelegatesAndSubscriptions.csproj", "{E9A943BD-2A82-4DCC-9CF3-3EA9BAA237C2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyRandom", "Dependencies\HeresyRandom\HeresyRandom\HeresyRandom.csproj", "{D6917763-5852-4BF6-8EB2-BD775C343DF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{ef1015c4-9b5e-3704-d3a4-0caa41e06335}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{d39fb7e7-0814-24ea-0774-c8845565e793}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{d39fb7e7-0814-24ea-0774-c8845565e793}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ef1015c4-9b5e-3704-d3a4-0caa41e06335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ef1015c4-9b5e-3704-d3a4-0caa41e06335}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{883620F8-1A76-4D50-82EA-CE7F33A1C3FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{883620F8-1A76-4D50-82EA-CE7F33A1C3FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{883620F8-1A76-4D50-82EA-CE7F33A1C3FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{883620F8-1A76-4D50-82EA-CE7F33A1C3FF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{64E50172-676B-4830-AC7F-13B810F58726}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64E50172-676B-4830-AC7F-13B810F58726}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64E50172-676B-4830-AC7F-13B810F58726}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64E50172-676B-4830-AC7F-13B810F58726}.Release|Any CPU.Build.0 = Release|Any CPU
-		{76E778EF-6BAF-4661-AF5D-940F9D904ACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76E778EF-6BAF-4661-AF5D-940F9D904ACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76E778EF-6BAF-4661-AF5D-940F9D904ACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76E778EF-6BAF-4661-AF5D-940F9D904ACC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{98836BB6-FA47-453D-93A0-7EF339E0E898}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{98836BB6-FA47-453D-93A0-7EF339E0E898}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{98836BB6-FA47-453D-93A0-7EF339E0E898}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{98836BB6-FA47-453D-93A0-7EF339E0E898}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E9A943BD-2A82-4DCC-9CF3-3EA9BAA237C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E9A943BD-2A82-4DCC-9CF3-3EA9BAA237C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E9A943BD-2A82-4DCC-9CF3-3EA9BAA237C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E9A943BD-2A82-4DCC-9CF3-3EA9BAA237C2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6917763-5852-4BF6-8EB2-BD775C343DF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6917763-5852-4BF6-8EB2-BD775C343DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6917763-5852-4BF6-8EB2-BD775C343DF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6917763-5852-4BF6-8EB2-BD775C343DF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
