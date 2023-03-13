@@ -6,13 +6,6 @@ using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging
 {
-    //TODO:
-    //Right now message bus is in broadcast mode
-    //To send messages to particular recepients (i.e. how Defold does it) I plan on adding the following:
-    //1. IMessage shall contain a 'header' with EMessageDestination enum (UNICAST, BROADCAST) and a recepient address string
-    //2. Message buses shall additionally contain a pool of IMessageBroker's for kinda 'personal mailboxes'
-    //3. To resolve recepients on addressed messages I shall add a trie (prefix tree) with early return option
-    //   i.e. if address is "Entities/Entity 12" and there is only one node behind starting E then it performs full string comparison with the node and sends it the message
     public class MessageBus
         : IMessageSender, 
 	      IMessageReceiver
@@ -99,7 +92,12 @@ namespace HereticalSolutions.Messaging
         {
 	        mailbox.Enqueue(message);
         }
-        
+
+        public void Send<TMessage>(TMessage message) where TMessage : IMessage
+        {
+	        mailbox.Enqueue(message);
+        }
+
         public void Send<TMessage>(IMessage message) where TMessage : IMessage
         {
 	        mailbox.Enqueue(message);
@@ -116,7 +114,7 @@ namespace HereticalSolutions.Messaging
         {
 	        broadcaster.Publish<TMessage>(message);
 
-	        PushMessage<TMessage>(message);
+	        PushMessageToPool<TMessage>(message);
         }
         
         #endregion
@@ -169,47 +167,26 @@ namespace HereticalSolutions.Messaging
 
         #region IMessageReceiver
         
-        public void SubscribeTo(Type messageType, Action<IMessage> receiverDelegate)
+        public void SubscribeTo<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
         {
-	        broadcaster.Subscribe(receiverDelegate);
-        }
-
-        public void SubscribeTo<TMessage>(Action<IMessage> receiverDelegate) where TMessage : IMessage
-        {
-	        var messageType = typeof(TMessage);
-	        
-	        if (!this.broadcaster.TryGet(
-		            messageType,
-		            out IBroadcastable<IMessage> broadcaster))
-		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
-
-	        var subscription = new BroadcastHandler<TMessage>(receiverDelegate);
-	        
-	        var subscriptionPoolElement = broadcaster.Subscribe(subscription);
-
-	        return subscriptionPoolElement;
-        }
-
-        public IPoolElement<BroadcastHandler<IMessage>> SubscribeToNonAlloc(Type messageType, BroadcastHandler<IMessage> subscription)
-        {
-	        throw new NotImplementedException();
-        }
-
-        public IPoolElement<BroadcastHandler<IMessage>> SubscribeToNonAlloc<TMessage>(BroadcastHandler<TMessage> subscription) where TMessage : IMessage
-        {
-	        throw new NotImplementedException();
-        }
-
-        public void UnsubscribeFrom<TMessage>(IPoolElement<BroadcastHandler<TMessage>> subscriptionPoolElement) where TMessage : IMessage
-        {
-	        throw new NotImplementedException();
-        }
-
-        public void UnsubscribeFrom()
-        {
-	        
+	        broadcaster.Subscribe<TMessage>(receiverDelegate);
         }
         
+        public void SubscribeTo(Type messageType, object receiverDelegate)
+        {
+	        broadcaster.Subscribe(messageType, receiverDelegate);
+        }
+
+        public void UnsubscribeFrom<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
+        {
+	        broadcaster.Unsubscribe<TMessage>(receiverDelegate);
+        }
+
+        public void UnsubscribeFrom(Type messageType, object receiverDelegate)
+        {
+	        broadcaster.Unsubscribe(messageType, receiverDelegate);
+        }
+
         #endregion
     }
 }
