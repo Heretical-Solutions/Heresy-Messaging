@@ -1,159 +1,190 @@
 using System;
 using System.Collections.Generic;
 
-using UniRx;
+using HereticalSolutions.Delegates.Broadcasting;
 
-using HereticalSolutions.Collections.Managed;
+using HereticalSolutions.Pools;
+
 using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Messaging
 {
-    //TODO:
-    //Right now message bus is in broadcast mode
-    //To send messages to particular recepients (i.e. how Defold does it) I plan on adding the following:
-    //1. IMessage shall contain a 'header' with EMessageDestination enum (UNICAST, BROADCAST) and a recepient address string
-    //2. Message buses shall additionally contain a pool of IMessageBroker's for kinda 'personal mailboxes'
-    //3. To resolve recepients on addressed messages I shall add a trie (prefix tree) with early return option
-    //   i.e. if address is "Entities/Entity 12" and there is only one node behind starting E then it performs full string comparison with the node and sends it the message
     public class MessageBus
-        : IMessageSubscribable,
-          IMessageSendable,
-          IMessageReceivable
+        : IMessageSender, 
+	      IMessageReceiver
     {
-        private IMessageBroker broker;
+	    private BroadcasterWithRepository broadcaster;
 
-        private IRepository<Type, StackPool<IMessage>> messageRepository;
+        private IReadOnlyObjectRepository messageRepository;
 
         private Queue<IMessage> mailbox;
 
-        public bool MailboxNotEmpty { get { return mailbox.Count != 0; } }
-
         public MessageBus(
-            IMessageBroker broker,
-			IRepository<Type, StackPool<IMessage>> messageRepository,
+	        BroadcasterWithRepository broadcaster,
+	        IReadOnlyObjectRepository messageRepository,
 			Queue<IMessage> mailbox)
         {
-            this.broker = broker;
+            this.broadcaster = broadcaster;
 
             this.messageRepository = messageRepository;
 
             this.mailbox = mailbox;
         }
 
-        public IDisposable SubscribeTo<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
+        #region IMessageSender
+
+        #region Pop
+        
+        public IMessageSender PopMessage(Type messageType, out IMessage message)
         {
-			return broker
-                .Receive<TMessage>()
-                .Subscribe(message => receiverDelegate(message));
-				//.AddTo(disposables);
+	        if (!messageRepository.TryGet(
+		            messageType,
+		            out object messagePoolObject))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
+
+	        IPool<IMessage> messagePool = (IPool<IMessage>)messagePoolObject;
+	        
+	        message = messagePool.Pop();
+
+	        return this;
         }
 
-		public MessageBus PopMessage(Type messageType, out IMessage message)
-		{
-			if (!messageRepository.TryGet(
-				messageType,
-				out StackPool<IMessage> messagePool))
-				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
-
-			message = messagePool.Pop();
-
-			return this;
-		}
-
-        public MessageBus PopMessage<TMessage>(out TMessage message) where TMessage : IMessage
+        public IMessageSender PopMessage<TMessage>(out TMessage message) where TMessage : IMessage
         {
-            if (!messageRepository.TryGet(
-                typeof(TMessage),
-                out StackPool<IMessage> messagePool))
-                throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
+	        if (!messageRepository.TryGet(
+		            typeof(TMessage),
+		            out object messagePoolObject))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
 
-            message = (TMessage)messagePool.Pop();
+	        IPool<IMessage> messagePool = (IPool<IMessage>)messagePoolObject;
+	        
+	        message = (TMessage)messagePool.Pop();
 
-            return this;
+	        return this;
         }
 
-		public MessageBus Write(IMessage message, params object[] args)
-		{
-			if (message == null)
-				throw new Exception($"[MessageBus] INVALID MESSAGE");
+        #endregion
+        
+        #region Write
+        
+        public IMessageSender Write(IMessage message, object[] args)
+        {
+	        if (message == null)
+		        throw new Exception($"[MessageBus] INVALID MESSAGE");
 
-			message.Write(args);
+	        message.Write(args);
 
-			return this;
-		}
+	        return this;
+        }
 
+        public IMessageSender Write<TMessage>(TMessage message, object[] args) where TMessage : IMessage
+        {
+	        if (message == null)
+		        throw new Exception($"[MessageBus] INVALID MESSAGE");
+
+	        message.Write(args);
+
+	        return this;
+        }
+
+        #endregion
+        
+        #region Send
+        
         public void Send(IMessage message)
         {
-            mailbox.Enqueue(message);
+	        mailbox.Enqueue(message);
         }
 
-		public void Send<TMessage>(TMessage message) where TMessage : IMessage
-		{
-			mailbox.Enqueue(message);
-		}
+        public void Send<TMessage>(TMessage message) where TMessage : IMessage
+        {
+	        mailbox.Enqueue(message);
+        }
 
         public void SendImmediately(IMessage message)
         {
-            broker.Publish(message);
+	        broadcaster.Publish(message.GetType(), message);
 
-            PushMessage(message);
+	        PushMessageToPool(message);
         }
-
-		public void SendImmediately<TMessage>(TMessage message) where TMessage : IMessage
-		{
-			broker.Publish(message);
-
-            PushMessage<TMessage>(message);
-		}
-
-        public void Receive(int maxAmount)
+        
+        public void SendImmediately<TMessage>(TMessage message) where TMessage : IMessage
         {
-            int messagesToReceive = Math.Min(maxAmount, mailbox.Count);
+	        broadcaster.Publish<TMessage>(message);
 
-            for (int i = 0; i < messagesToReceive; i++)
-            {
-                var message = mailbox.Dequeue();
-
-				broker.Publish(message);
-
-				PushMessage(message);
-            }
+	        PushMessageToPool<TMessage>(message);
         }
-
-		public void ReceiveAll()
-		{
-			int messagesToReceive = mailbox.Count;
-
-			for (int i = 0; i < messagesToReceive; i++)
-			{
-				var message = mailbox.Dequeue();
-
-				broker.Publish(message);
-
-				PushMessage(message);
-			}
-		}
-
-        private void PushMessage(IMessage message)
+        
+        #endregion
+        
+        #region Deliver
+        
+        public void DeliverMessagesInMailbox()
         {
-            var messageType = message.GetType();
+	        int messagesToReceive = mailbox.Count;
 
-			if (!messageRepository.TryGet(
-				messageType,
-				out StackPool<IMessage> messagePool))
-				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
+	        for (int i = 0; i < messagesToReceive; i++)
+	        {
+		        var message = mailbox.Dequeue();
 
-			messagePool.Push(message);
+		        SendImmediately(message);
+	        }
+        }
+        
+        #endregion
+        
+        private void PushMessageToPool(IMessage message)
+        {
+	        var messageType = message.GetType();
+
+	        if (!messageRepository.TryGet(
+		            messageType,
+		            out object messagePoolObject))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {messageType.ToString()}");
+
+	        IPool<IMessage> messagePool = (IPool<IMessage>)messagePoolObject;
+	        
+	        messagePool.Push(message);
         }
 
-		private void PushMessage<TMessage>(TMessage message) where TMessage : IMessage
-		{
-			if (!messageRepository.TryGet(
-				typeof(TMessage),
-				out StackPool<IMessage> messagePool))
-				throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
+        private void PushMessageToPool<TMessage>(TMessage message) where TMessage : IMessage
+        {
+	        var messageType = typeof(TMessage);
+	        
+	        if (!messageRepository.TryGet(
+		            messageType,
+		            out object messagePoolObject))
+		        throw new Exception($"[MessageBus] INVALID MESSAGE TYPE FOR PARTICULAR MESSAGE BUS: {typeof(TMessage).ToString()}");
 
-			messagePool.Push(message);
-		}
+	        IPool<IMessage> messagePool = (IPool<IMessage>)messagePoolObject;
+	        
+	        messagePool.Push(message);
+        }
+
+        #endregion
+
+        #region IMessageReceiver
+        
+        public void SubscribeTo<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
+        {
+	        broadcaster.Subscribe<TMessage>(receiverDelegate);
+        }
+        
+        public void SubscribeTo(Type messageType, object receiverDelegate)
+        {
+	        broadcaster.Subscribe(messageType, receiverDelegate);
+        }
+
+        public void UnsubscribeFrom<TMessage>(Action<TMessage> receiverDelegate) where TMessage : IMessage
+        {
+	        broadcaster.Unsubscribe<TMessage>(receiverDelegate);
+        }
+
+        public void UnsubscribeFrom(Type messageType, object receiverDelegate)
+        {
+	        broadcaster.Unsubscribe(messageType, receiverDelegate);
+        }
+
+        #endregion
     }
 }
