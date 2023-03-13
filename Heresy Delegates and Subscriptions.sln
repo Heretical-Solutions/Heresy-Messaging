@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyDelegatesAndSubscriptions", "HeresyDelegatesAndSubscriptions\HeresyDelegatesAndSubscriptions.csproj", "{C95E409D-495D-47A1-83B8-0D6D6A8F3E2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyDatabasesAndRepositories", "Dependencies\HeresyRepositories\HeresyDatabasesAndRepositories\HeresyDatabasesAndRepositories.csproj", "{C82A8919-2FD8-4FB0-88C8-E67E84E4D3C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyPools", "Dependencies\HeresyPools\HeresyPools\HeresyPools.csproj", "{A44B8336-B1B1-4E08-8FF8-A95650DFE439}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyMemory", "Dependencies\HeresyMemory\HeresyMemory\HeresyMemory.csproj", "{16D539F2-E178-4432-85B3-47D3B85EEF41}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeresyRandom", "Dependencies\HeresyRandom\HeresyRandom\HeresyRandom.csproj", "{F6B31E85-CDC6-4A81-9EEA-F5640C5FAFE0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C95E409D-495D-47A1-83B8-0D6D6A8F3E2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C95E409D-495D-47A1-83B8-0D6D6A8F3E2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C95E409D-495D-47A1-83B8-0D6D6A8F3E2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C95E409D-495D-47A1-83B8-0D6D6A8F3E2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C82A8919-2FD8-4FB0-88C8-E67E84E4D3C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C82A8919-2FD8-4FB0-88C8-E67E84E4D3C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C82A8919-2FD8-4FB0-88C8-E67E84E4D3C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C82A8919-2FD8-4FB0-88C8-E67E84E4D3C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A44B8336-B1B1-4E08-8FF8-A95650DFE439}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A44B8336-B1B1-4E08-8FF8-A95650DFE439}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A44B8336-B1B1-4E08-8FF8-A95650DFE439}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A44B8336-B1B1-4E08-8FF8-A95650DFE439}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16D539F2-E178-4432-85B3-47D3B85EEF41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16D539F2-E178-4432-85B3-47D3B85EEF41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16D539F2-E178-4432-85B3-47D3B85EEF41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16D539F2-E178-4432-85B3-47D3B85EEF41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6B31E85-CDC6-4A81-9EEA-F5640C5FAFE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6B31E85-CDC6-4A81-9EEA-F5640C5FAFE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6B31E85-CDC6-4A81-9EEA-F5640C5FAFE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6B31E85-CDC6-4A81-9EEA-F5640C5FAFE0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
