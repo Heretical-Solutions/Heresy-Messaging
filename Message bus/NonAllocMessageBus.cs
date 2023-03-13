@@ -11,8 +11,8 @@ using HereticalSolutions.Repositories;
 namespace HereticalSolutions.Messaging
 {
     public class NonAllocMessageBus
-        : IMessageSenderNonAlloc, 
-	      IMessageReceiverNonAlloc
+        : INonAllocMessageSender, 
+	      INonAllocMessageReceiver
     {
         private NonAllocBroadcasterWithRepository broadcaster;
 
@@ -36,7 +36,7 @@ namespace HereticalSolutions.Messaging
 
         #region Pop
         
-        public IMessageSenderNonAlloc PopMessage(Type messageType, out IPoolElement<IMessage> message)
+        public INonAllocMessageSender PopMessage(Type messageType, out IPoolElement<IMessage> message)
         {
             if (!messageRepository.TryGet(
                     messageType,
@@ -50,7 +50,7 @@ namespace HereticalSolutions.Messaging
             return this;
         }
 
-        public IMessageSenderNonAlloc PopMessage<TMessage>(out IPoolElement<IMessage> message) where TMessage : IMessage
+        public INonAllocMessageSender PopMessage<TMessage>(out IPoolElement<IMessage> message) where TMessage : IMessage
         {
             if (!messageRepository.TryGet(
                     typeof(TMessage),
@@ -68,7 +68,7 @@ namespace HereticalSolutions.Messaging
 
         #region Write
 
-        public IMessageSenderNonAlloc Write(IPoolElement<IMessage> message, object[] args)
+        public INonAllocMessageSender Write(IPoolElement<IMessage> message, object[] args)
         {
             if (message == null)
                 throw new Exception($"[NonAllocMessageBus] INVALID MESSAGE");
@@ -78,7 +78,7 @@ namespace HereticalSolutions.Messaging
             return this;
         }
         
-        public IMessageSenderNonAlloc Write<TMessage>(IPoolElement<IMessage> message, object[] args) where TMessage : IMessage
+        public INonAllocMessageSender Write<TMessage>(IPoolElement<IMessage> message, object[] args) where TMessage : IMessage
         {
             if (message == null)
                 throw new Exception($"[NonAllocMessageBus] INVALID MESSAGE");
