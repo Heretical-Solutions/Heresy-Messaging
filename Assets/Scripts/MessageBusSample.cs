@@ -133,6 +133,8 @@ public class MessageBusSample : MonoBehaviour
             
             messageBusAsReceiver.SubscribeTo(typeof(SampleMessage), subscription);
         }
+
+        subscriptionActive = true;
     }
 
     void Unsubscribe()
@@ -147,6 +149,8 @@ public class MessageBusSample : MonoBehaviour
             
             messageBusAsReceiver.UnsubscribeFrom(typeof(SampleMessage), subscription);
         }
+
+        subscriptionActive = false;
     }
 
     private class SampleMessage : IMessage

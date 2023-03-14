@@ -2,8 +2,8 @@ namespace HereticalSolutions.Delegates
 {
     public interface INonAllocSubscribableNoArgs
     {
-        void Subscribe(ISubscriptionHandler<INonAllocSubscribableNoArgs, IInvokableNoArgs> subscription);
+        void Subscribe(ISubscription subscription);
 
-        void Unsubscribe(ISubscriptionHandler<INonAllocSubscribableNoArgs, IInvokableNoArgs> subscription);
+        void Unsubscribe(ISubscription subscription);
     }
 }

@@ -43,21 +43,25 @@ namespace HereticalSolutions.Delegates.Pinging
 
 		#region INonAllocSubscribableNoArgs
 		
-		public void Subscribe(ISubscriptionHandler<INonAllocSubscribableNoArgs, IInvokableNoArgs> subscription)
+		public void Subscribe(ISubscription subscription)
 		{
-			if (!subscription.ValidateActivation(this))
+			var subscriptionHandler = (ISubscriptionHandler<INonAllocSubscribableNoArgs, IInvokableNoArgs>)subscription;
+			
+			if (!subscriptionHandler.ValidateActivation(this))
 				return;
 			
 			var subscriptionElement = subscriptionsPool.Pop(null);
 
 			subscriptionElement.Value = ((ISubscriptionState<IInvokableNoArgs>)subscription).Invokable;
 
-			subscription.Activate(this, subscriptionElement);
+			subscriptionHandler.Activate(this, subscriptionElement);
 		}
 
-		public void Unsubscribe(ISubscriptionHandler<INonAllocSubscribableNoArgs, IInvokableNoArgs> subscription)
+		public void Unsubscribe(ISubscription subscription)
 		{
-			if (!subscription.ValidateTermination(this))
+			var subscriptionHandler = (ISubscriptionHandler<INonAllocSubscribableNoArgs, IInvokableNoArgs>)subscription;
+			
+			if (!subscriptionHandler.ValidateTermination(this))
 				return;
 
 			var poolElement = ((ISubscriptionState<IInvokableNoArgs>)subscription).PoolElement;
@@ -68,7 +72,7 @@ namespace HereticalSolutions.Delegates.Pinging
 
 			subscriptionsPool.Push(poolElement);
 			
-			subscription.Terminate();
+			subscriptionHandler.Terminate();
 		}
 
 		public void Unsubscribe(IPoolElement<IInvokableNoArgs> subscription)
