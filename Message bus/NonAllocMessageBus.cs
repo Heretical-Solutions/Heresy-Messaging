@@ -68,22 +68,22 @@ namespace HereticalSolutions.Messaging
 
         #region Write
 
-        public INonAllocMessageSender Write(IPoolElement<IMessage> message, object[] args)
+        public INonAllocMessageSender Write(IPoolElement<IMessage> messageElement, object[] args)
         {
-            if (message == null)
+            if (messageElement == null)
                 throw new Exception($"[NonAllocMessageBus] INVALID MESSAGE");
 
-            message.Value.Write(args);
+            messageElement.Value.Write(args);
 
             return this;
         }
         
-        public INonAllocMessageSender Write<TMessage>(IPoolElement<IMessage> message, object[] args) where TMessage : IMessage
+        public INonAllocMessageSender Write<TMessage>(IPoolElement<IMessage> messageElement, object[] args) where TMessage : IMessage
         {
-            if (message == null)
+            if (messageElement == null)
                 throw new Exception($"[NonAllocMessageBus] INVALID MESSAGE");
 
-            message.Value.Write(args);
+            messageElement.Value.Write(args);
 
             return this;
         }
@@ -166,32 +166,22 @@ namespace HereticalSolutions.Messaging
 
         #region IMessageReceiverNonAlloc
         
-        public void SubscribeTo<TMessage>(ISubscription<INonAllocSubscribableSingleArgGeneric<TMessage>> subscription) where TMessage : IMessage
+        public void SubscribeTo<TMessage>(ISubscription subscription) where TMessage : IMessage
         {
             broadcaster.Subscribe<TMessage>((ISubscriptionHandler<INonAllocSubscribableSingleArgGeneric<TMessage>, IInvokableSingleArgGeneric<TMessage>>)subscription);
         }
         
-        public void SubscribeTo<TMessage>(ISubscription<INonAllocSubscribableSingleArg> subscription)
-        {
-            broadcaster.Subscribe(typeof(TMessage), (ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg>)subscription);
-        }
-
-        public void SubscribeTo(Type messageType, ISubscription<INonAllocSubscribableSingleArg> subscription)
+        public void SubscribeTo(Type messageType, ISubscription subscription)
         {
             broadcaster.Subscribe(messageType, (ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg>)subscription);
         }
 
-        public void UnsubscribeFrom<TMessage>(ISubscription<INonAllocSubscribableSingleArgGeneric<TMessage>> subscription) where TMessage : IMessage
+        public void UnsubscribeFrom<TMessage>(ISubscription subscription) where TMessage : IMessage
         {
             broadcaster.Unsubscribe<TMessage>((ISubscriptionHandler<INonAllocSubscribableSingleArgGeneric<TMessage>, IInvokableSingleArgGeneric<TMessage>>)subscription);
         }
         
-        public void UnsubscribeFrom<TMessage>(ISubscription<INonAllocSubscribableSingleArg> subscription)
-        {
-            broadcaster.Unsubscribe(typeof(TMessage), (ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg>)subscription);
-        }
-
-        public void UnsubscribeFrom(Type messageType, ISubscription<INonAllocSubscribableSingleArg> subscription)
+        public void UnsubscribeFrom(Type messageType, ISubscription subscription)
         {
             broadcaster.Unsubscribe(messageType, (ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg>)subscription);
         }
