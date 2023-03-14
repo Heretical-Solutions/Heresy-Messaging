@@ -42,7 +42,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
 
             var broadcaster = (IPublisherSingleArg)broadcasterObject;
             
-            broadcaster.Publish(value);
+            broadcaster.Publish(messageType, value);
         }
 
         #endregion

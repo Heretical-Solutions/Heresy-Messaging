@@ -1,3 +1,4 @@
+using System;
 using HereticalSolutions.Delegates;
 using HereticalSolutions.Delegates.Factories;
 
@@ -6,40 +7,34 @@ using HereticalSolutions.Messaging.Factories;
 
 using UnityEngine;
 
-public class NonAllocMessageBusSample : MonoBehaviour
+public class MessageBusSample : MonoBehaviour
 {
-    private INonAllocMessageSender messageBusAsSender;
+    private IMessageSender messageBusAsSender;
 
-    private INonAllocMessageReceiver messageBusAsReceiver;
-
-    private ISubscription subscription;
+    private IMessageReceiver messageBusAsReceiver;
 
     private readonly string messageText1 = "Message all generics sent";
     
     private readonly string messageText2 = "Message typeof sent";
     
     private object[] messageArgs;
+
+    private bool subscriptionActive;
     
     // Start is called before the first frame update
     void Start()
     {
         #region Message bus
         
-        var builder = new NonAllocMessageBusBuilder();
+        var builder = new MessageBusBuilder();
 
         builder.AddMessageType<SampleMessage>();
 
         var messageBus = builder.Build();
 
-        messageBusAsSender = (INonAllocMessageSender)messageBus;
+        messageBusAsSender = (IMessageSender)messageBus;
         
-        messageBusAsReceiver = (INonAllocMessageReceiver)messageBus;
-        
-        #endregion
-
-        #region Subscription
-        
-        subscription = DelegatesFactory.BuildSubscriptionSingleArgGeneric<SampleMessage>(Print);
+        messageBusAsReceiver = (IMessageReceiver)messageBus;
         
         #endregion
 
@@ -54,9 +49,7 @@ public class NonAllocMessageBusSample : MonoBehaviour
 
     void Print(SampleMessage message)
     {
-        //Just imagine this. I need to ensure there are no allocations on 'non alloc' message bus so i leave this commented out
-        
-        //Debug.Log(message.Message);
+        Debug.Log(message.Message);
     }
 
     // Update is called once per frame
@@ -64,14 +57,13 @@ public class NonAllocMessageBusSample : MonoBehaviour
     {
         DeliverMessagesInMailbox();
         
-        //if (subscription.Active)
         SendMessage();
         
         bool doSomething = UnityEngine.Random.Range(0f, 1f) < 0.1f;
 
         if (doSomething)
         {
-            if (subscription.Active)
+            if (subscriptionActive)
                 Unsubscribe();
             else
                 Subscribe();
@@ -134,9 +126,13 @@ public class NonAllocMessageBusSample : MonoBehaviour
         bool subscribeWithGeneric = UnityEngine.Random.Range(0f, 1f) > 0.5f;
         
         if (subscribeWithGeneric)
-            messageBusAsReceiver.SubscribeTo<SampleMessage>(subscription);
+            messageBusAsReceiver.SubscribeTo<SampleMessage>(Print);
         else
+        {
+            Action<SampleMessage> subscription = Print;
+            
             messageBusAsReceiver.SubscribeTo(typeof(SampleMessage), subscription);
+        }
     }
 
     void Unsubscribe()
@@ -144,9 +140,13 @@ public class NonAllocMessageBusSample : MonoBehaviour
         bool unsubscribeWithGeneric = UnityEngine.Random.Range(0f, 1f) > 0.5f;
         
         if (unsubscribeWithGeneric)
-            messageBusAsReceiver.UnsubscribeFrom<SampleMessage>(subscription);
+            messageBusAsReceiver.UnsubscribeFrom<SampleMessage>(Print);
         else
+        {
+            Action<SampleMessage> subscription = Print;
+            
             messageBusAsReceiver.UnsubscribeFrom(typeof(SampleMessage), subscription);
+        }
     }
 
     private class SampleMessage : IMessage
