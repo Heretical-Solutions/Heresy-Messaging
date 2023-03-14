@@ -4,13 +4,13 @@ using HereticalSolutions.Messaging;
 using HereticalSolutions.Messaging.Factories;
 using UnityEngine;
 
-public class PingerSample : MonoBehaviour
+public class MessageBusSample : MonoBehaviour
 {
     private INonAllocMessageSender messageBusAsSender;
 
     private INonAllocMessageReceiver messageBusAsReceiver;
 
-    private ISubscription<INonAllocSubscribableSingleArg> subscription;
+    private ISubscription subscription;
 
     private string messageText1 = "Message single generic sent";
     
@@ -39,7 +39,7 @@ public class PingerSample : MonoBehaviour
 
         #region Subscription
         
-        subscription = DelegatesFactory.BuildSubscriptionSingleArg<SampleMessage>(Print);
+        subscription = DelegatesFactory.BuildSubscriptionSingleArgGeneric<SampleMessage>(Print);
         
         #endregion
 
@@ -54,7 +54,8 @@ public class PingerSample : MonoBehaviour
 
     void Print(SampleMessage message)
     {
-        Debug.Log("Ping");
+        //Just imagine this. I need to ensure there are no allocations on 'non alloc' message bus so i leave this commented out
+        //Debug.Log(message.Message);
     }
 
     // Update is called once per frame
@@ -76,6 +77,7 @@ public class PingerSample : MonoBehaviour
 
     void SendMessage()
     {
+        /*
         bool singleGeneric = UnityEngine.Random.Range(0f, 1f) > 0.5f;
 
         if (singleGeneric)
@@ -89,6 +91,7 @@ public class PingerSample : MonoBehaviour
             
             return;
         }
+        */
         
         bool allGenerics = UnityEngine.Random.Range(0f, 1f) > 0.5f;
         
@@ -114,17 +117,6 @@ public class PingerSample : MonoBehaviour
 
     void Subscribe()
     {
-        /*
-        bool subscribeFromSubscription = UnityEngine.Random.Range(0f, 1f) > 0.5f;
-
-        if (subscribeFromSubscription)
-        {
-            subscription.Subscribe((INonAllocSubscribableSingleArg)messageBusAsReceiver);
-            
-            return;
-        }
-        */
-        
         bool subscribeWithGeneric = UnityEngine.Random.Range(0f, 1f) > 0.5f;
         
         if (subscribeWithGeneric)
@@ -135,15 +127,6 @@ public class PingerSample : MonoBehaviour
 
     void Unsubscribe()
     {
-        bool unsubscribeFromSubscription = UnityEngine.Random.Range(0f, 1f) > 0.5f;
-
-        if (unsubscribeFromSubscription)
-        {
-            subscription.Unsubscribe();
-            
-            return;
-        }
-
         bool unsubscribeWithGeneric = UnityEngine.Random.Range(0f, 1f) > 0.5f;
         
         if (unsubscribeWithGeneric)
@@ -155,7 +138,12 @@ public class PingerSample : MonoBehaviour
     private class SampleMessage : IMessage
     {
         private string message;
-        
+
+        public string Message
+        {
+            get => message;
+        }
+
         public void Write(object[] args)
         {
             message = (string)args[0];

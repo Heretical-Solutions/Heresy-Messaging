@@ -17,11 +17,6 @@ namespace HereticalSolutions.Delegates.Broadcasting
 			multicastDelegate?.Invoke(value);
 		}
 		
-		public void Publish(object value)
-		{
-			multicastDelegate?.Invoke((TValue)value);
-		}
-
 		#endregion
 
 		#region IPublisherSingleArg
@@ -31,7 +26,10 @@ namespace HereticalSolutions.Delegates.Broadcasting
 			if (!(typeof(TArgument).Equals(typeof(TValue))))
 				throw new Exception($"[BroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{typeof(TArgument).ToString()}\"");
 			
-			Publish((object)value); //It doesn't want to convert TArgument into TValue. Bastard
+			//DIRTY HACKS DO NOT REPEAT
+			object valueObject = (object)value;
+			
+			Publish((TValue)valueObject); //It doesn't want to convert TArgument into TValue. Bastard
 		}
 
 		public void Publish(Type valueType, object value)
@@ -39,7 +37,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
 			if (!(valueType.Equals(typeof(TValue))))
 				throw new Exception($"[BroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{valueType.ToString()}\"");
 			
-			Publish(value); //It doesn't want to convert TArgument into TValue. Bastard
+			Publish((TValue)value);
 		}
 
 		#endregion
@@ -86,10 +84,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
 			if (!(valueType.Equals(typeof(TValue))))
 				throw new Exception($"[BroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{valueType.ToString()}\"");
 
-			//DIRTY HACKS DO NOT REPEAT
-			object delegateObject = (object)@delegate;
-			
-			multicastDelegate += (Action<TValue>)delegateObject;
+			multicastDelegate += (Action<TValue>)@delegate;
 		}
 
 		public void Unsubscribe<TArgument>(Action<TArgument> @delegate)
@@ -108,10 +103,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
 			if (!(valueType.Equals(typeof(TValue))))
 				throw new Exception($"[BroadcasterGeneric] INVALID ARGUMENT TYPE. EXPECTED: \"{typeof(TValue).ToString()}\" RECEIVED: \"{valueType.ToString()}\"");
 
-			//DIRTY HACKS DO NOT REPEAT
-			object delegateObject = (object)@delegate;
-			
-			multicastDelegate -= (Action<TValue>)delegateObject;
+			multicastDelegate -= (Action<TValue>)@delegate;
 		}
 
 		#endregion

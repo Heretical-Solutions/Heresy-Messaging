@@ -7,27 +7,35 @@ using HereticalSolutions.Pools;
 namespace HereticalSolutions.Delegates.Subscriptions
 {
     public class SubscriptionNoArgs
-        : ISubscription<INonAllocSubscribableNoArgs>,
+        : ISubscription,
+          ISubscriptionState<IInvokableNoArgs>,
           ISubscriptionHandler<INonAllocSubscribableNoArgs, IInvokableNoArgs>
     {
+        private readonly IInvokableNoArgs invokable;
+        
+        private INonAllocSubscribableNoArgs publisher;
+
+        private IPoolElement<IInvokableNoArgs> poolElement;
+        
         public SubscriptionNoArgs(
             Action @delegate)
         {
-            Delegate = DelegatesFactory.BuildDelegateWrapperNoArgs(@delegate);
+            invokable = DelegatesFactory.BuildDelegateWrapperNoArgs(@delegate);
 
             Active = false;
 
-            Publisher = null;
+            publisher = null;
 
-            PoolElement = null;
+            poolElement = null;
         }
 
         #region ISubscription
         
         public bool Active { get; private set;  }
         
-        public INonAllocSubscribableNoArgs Publisher { get; private set; }
+        #endregion
 
+        /*
         public void Subscribe(INonAllocSubscribableNoArgs publisher)
         {
             if (Active)
@@ -41,29 +49,38 @@ namespace HereticalSolutions.Delegates.Subscriptions
             if (!Active)
                 return;
 
-            Publisher.Unsubscribe(this);
+            publisher.Unsubscribe(this);
+        }
+        */
+
+        #region ISubscriptionState
+
+        public IInvokableNoArgs Invokable
+        {
+            get => invokable;
+        }
+
+        public IPoolElement<IInvokableNoArgs> PoolElement
+        {
+            get => poolElement;
         }
         
         #endregion
 
         #region ISubscriptionHandler
-
-        public IInvokableNoArgs Delegate { get; private set; }
-
-        public IPoolElement<IInvokableNoArgs> PoolElement { get; private set; }
-
+        
         public bool ValidateActivation(INonAllocSubscribableNoArgs publisher)
         {
             if (Active)
                 throw new Exception("[SubscriptionNoArgs] ATTEMPT TO ACTIVATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
 			
-            if (Publisher != null)
+            if (this.publisher != null)
                 throw new Exception("[SubscriptionNoArgs] SUBSCRIPTION ALREADY HAS A PUBLISHER");
 			
-            if (PoolElement != null)
+            if (poolElement != null)
                 throw new Exception("[SubscriptionNoArgs] SUBSCRIPTION ALREADY HAS A POOL ELEMENT");
 			
-            if (Delegate == null)
+            if (invokable == null)
                 throw new Exception("[SubscriptionNoArgs] INVALID DELEGATE");
 
             return true;
@@ -73,9 +90,9 @@ namespace HereticalSolutions.Delegates.Subscriptions
             INonAllocSubscribableNoArgs publisher,
             IPoolElement<IInvokableNoArgs> poolElement)
         {
-            PoolElement = poolElement;
+            this.poolElement = poolElement;
 
-            Publisher = publisher;
+            this.publisher = publisher;
             
             Active = true;
         }
@@ -85,10 +102,10 @@ namespace HereticalSolutions.Delegates.Subscriptions
             if (!Active)
                 throw new Exception("[SubscriptionNoArgs] ATTEMPT TO TERMINATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
 			
-            if (Publisher != publisher)
+            if (this.publisher != publisher)
                 throw new Exception("[SubscriptionNoArgs] INVALID PUBLISHER");
 			
-            if (PoolElement == null)
+            if (poolElement == null)
                 throw new Exception("[SubscriptionNoArgs] INVALID POOL ELEMENT");
 
             return true;
@@ -96,9 +113,9 @@ namespace HereticalSolutions.Delegates.Subscriptions
 
         public void Terminate()
         {
-            PoolElement = null;
+            poolElement = null;
             
-            Publisher = null;
+            publisher = null;
             
             Active = false;
         }

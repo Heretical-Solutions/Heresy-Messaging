@@ -1,5 +1,5 @@
-using System;
 using HereticalSolutions.Collections;
+
 using HereticalSolutions.Pools;
 
 namespace HereticalSolutions.Delegates.Broadcasting
@@ -51,7 +51,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
 			
 			var subscriptionElement = subscriptionsPool.Pop(null);
 
-			subscriptionElement.Value = subscription.Delegate;
+			subscriptionElement.Value = ((ISubscriptionState<IInvokableMultipleArgs>)subscription).Invokable;
 
 			subscription.Activate(this, subscriptionElement);
 		}
@@ -61,7 +61,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
 			if (!subscription.ValidateTermination(this))
 				return;
 
-			var poolElement = subscription.PoolElement;
+			var poolElement = ((ISubscriptionState<IInvokableMultipleArgs>)subscription).PoolElement;
 			
 			TryRemoveFromBuffer(poolElement);
 			

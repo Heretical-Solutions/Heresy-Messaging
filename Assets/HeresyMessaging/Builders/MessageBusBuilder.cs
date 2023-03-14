@@ -16,9 +16,9 @@ namespace HereticalSolutions.Messaging.Factories
 
         private readonly BroadcasterWithRepositoryBuilder broadcasterBuilder;
         
-        private readonly AllocationCommand<IMessage> initialAllocationCommand;
+        //private readonly AllocationCommand<IMessage> initialAllocationCommand;
         
-        private readonly AllocationCommand<IMessage> additionalAllocationCommand;
+        //private readonly AllocationCommand<IMessage> additionalAllocationCommand;
 
         public MessageBusBuilder()
         {
@@ -26,9 +26,14 @@ namespace HereticalSolutions.Messaging.Factories
 
             broadcasterBuilder = new BroadcasterWithRepositoryBuilder();
             
-            Func<IMessage> valueAllocationDelegate= PoolsFactory.NullAllocationDelegate<IMessage>;
+            
+        }
 
-            initialAllocationCommand = new AllocationCommand<IMessage>
+        public MessageBusBuilder AddMessageType<TMessage>()
+        {
+            Func<IMessage> valueAllocationDelegate = PoolsFactory.ActivatorAllocationDelegate<IMessage, TMessage>;
+
+            var initialAllocationCommand = new AllocationCommand<IMessage>
             {
                 Descriptor = new AllocationCommandDescriptor
                 {
@@ -38,7 +43,7 @@ namespace HereticalSolutions.Messaging.Factories
                 AllocationDelegate = valueAllocationDelegate
             };
             
-            additionalAllocationCommand = new AllocationCommand<IMessage>
+            var additionalAllocationCommand = new AllocationCommand<IMessage>
             {
                 Descriptor = new AllocationCommandDescriptor
                 {
@@ -47,10 +52,7 @@ namespace HereticalSolutions.Messaging.Factories
 
                 AllocationDelegate = valueAllocationDelegate
             };
-        }
-
-        public MessageBusBuilder AddMessageType<TMessage>()
-        {
+            
             IPool<IMessage> messagePool = PoolsFactory.BuildStackPool<IMessage>(
                 initialAllocationCommand,
                 additionalAllocationCommand);

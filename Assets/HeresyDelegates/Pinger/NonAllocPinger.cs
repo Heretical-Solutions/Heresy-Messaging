@@ -50,7 +50,7 @@ namespace HereticalSolutions.Delegates.Pinging
 			
 			var subscriptionElement = subscriptionsPool.Pop(null);
 
-			subscriptionElement.Value = subscription.Delegate;
+			subscriptionElement.Value = ((ISubscriptionState<IInvokableNoArgs>)subscription).Invokable;
 
 			subscription.Activate(this, subscriptionElement);
 		}
@@ -60,7 +60,7 @@ namespace HereticalSolutions.Delegates.Pinging
 			if (!subscription.ValidateTermination(this))
 				return;
 
-			var poolElement = subscription.PoolElement;
+			var poolElement = ((ISubscriptionState<IInvokableNoArgs>)subscription).PoolElement;
 			
 			TryRemoveFromBuffer(poolElement);
 			

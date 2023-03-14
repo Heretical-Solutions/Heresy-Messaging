@@ -1,13 +1,11 @@
 namespace HereticalSolutions.Delegates
 {
-    public interface ISubscription<TSubscribable>
+    public interface ISubscription
     {
         bool Active { get; }
 
-        TSubscribable Publisher { get; }
-
-        void Subscribe(TSubscribable publisher);
+        //void Subscribe<TSubscribable>(TSubscribable publisher);
         
-        void Unsubscribe();
+        //void Unsubscribe();
     }
 }

@@ -16,19 +16,17 @@ namespace HereticalSolutions.Messaging.Factories
 
         private readonly NonAllocBroadcasterWithRepositoryBuilder broadcasterBuilder;
         
-        private Func<IMessage> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<IMessage>;
-
         public NonAllocMessageBusBuilder()
         {
             messagePoolRepository = RepositoriesFactory.BuildDictionaryObjectRepository();
 
             broadcasterBuilder = new NonAllocBroadcasterWithRepositoryBuilder();
-            
-            valueAllocationDelegate= PoolsFactory.NullAllocationDelegate<IMessage>;
         }
 
         public NonAllocMessageBusBuilder AddMessageType<TMessage>()
         {
+            Func<IMessage> valueAllocationDelegate = PoolsFactory.ActivatorAllocationDelegate<IMessage, TMessage>;
+            
             INonAllocDecoratedPool<IMessage> messagePool = PoolsFactory.BuildResizableNonAllocPool<IMessage>(
                 valueAllocationDelegate,
                 new []

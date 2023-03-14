@@ -16,9 +16,9 @@ namespace HereticalSolutions.Messaging
 
         #region Write
         
-        INonAllocMessageSender Write(IPoolElement<IMessage> message, object[] args);
+        INonAllocMessageSender Write(IPoolElement<IMessage> messageElement, object[] args);
         
-        INonAllocMessageSender Write<TMessage>(IPoolElement<IMessage> message, object[] args) where TMessage : IMessage;
+        INonAllocMessageSender Write<TMessage>(IPoolElement<IMessage> messageElement, object[] args) where TMessage : IMessage;
         
         #endregion
 

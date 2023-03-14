@@ -4,10 +4,6 @@ namespace HereticalSolutions.Delegates
 {
     public interface ISubscriptionHandler<TSubscribable, TInvokable>
     {
-        TInvokable Delegate { get; }
-
-        IPoolElement<TInvokable> PoolElement { get; }
-
         bool ValidateActivation(TSubscribable publisher);
         
         void Activate(

@@ -7,27 +7,35 @@ using HereticalSolutions.Pools;
 namespace HereticalSolutions.Delegates.Subscriptions
 {
     public class SubscriptionMultipleArgs
-        : ISubscription<INonAllocSubscribableMultipleArgs>,
+        : ISubscription,
+          ISubscriptionState<IInvokableMultipleArgs>,
           ISubscriptionHandler<INonAllocSubscribableMultipleArgs, IInvokableMultipleArgs>
     {
+        private readonly IInvokableMultipleArgs invokable;
+        
+        private INonAllocSubscribableMultipleArgs publisher;
+
+        private IPoolElement<IInvokableMultipleArgs> poolElement;
+        
         public SubscriptionMultipleArgs(
             Action<object[]> @delegate)
         {
-            Delegate = DelegatesFactory.BuildDelegateWrapperMultipleArgs(@delegate);
+            invokable = DelegatesFactory.BuildDelegateWrapperMultipleArgs(@delegate);
 
             Active = false;
 
-            Publisher = null;
+            publisher = null;
 
-            PoolElement = null;
+            poolElement = null;
         }
 
         #region ISubscription
         
         public bool Active { get; private set;  }
-        
-        public INonAllocSubscribableMultipleArgs Publisher { get; private set; }
 
+        #endregion
+        
+        /*
         public void Subscribe(INonAllocSubscribableMultipleArgs publisher)
         {
             if (Active)
@@ -41,29 +49,38 @@ namespace HereticalSolutions.Delegates.Subscriptions
             if (!Active)
                 return;
 
-            Publisher.Unsubscribe(this);
+            publisher.Unsubscribe(this);
         }
+        */
         
+        #region ISubscriptionState
+
+        public IInvokableMultipleArgs Invokable
+        {
+            get => invokable;
+        }
+
+        public IPoolElement<IInvokableMultipleArgs> PoolElement
+        {
+            get => poolElement;
+        }
+
         #endregion
 
         #region ISubscriptionHandler
-
-        public IInvokableMultipleArgs Delegate { get; private set; }
-
-        public IPoolElement<IInvokableMultipleArgs> PoolElement { get; private set; }
         
         public bool ValidateActivation(INonAllocSubscribableMultipleArgs publisher)
         {
             if (Active)
                 throw new Exception("[SubscriptionMultipleArgs] ATTEMPT TO ACTIVATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
 			
-            if (Publisher != null)
+            if (this.publisher != null)
                 throw new Exception("[SubscriptionMultipleArgs] SUBSCRIPTION ALREADY HAS A PUBLISHER");
 			
-            if (PoolElement != null)
+            if (poolElement != null)
                 throw new Exception("[SubscriptionMultipleArgs] SUBSCRIPTION ALREADY HAS A POOL ELEMENT");
 			
-            if (Delegate == null)
+            if (invokable == null)
                 throw new Exception("[SubscriptionMultipleArgs] INVALID DELEGATE");
 
             return true;
@@ -73,9 +90,9 @@ namespace HereticalSolutions.Delegates.Subscriptions
             INonAllocSubscribableMultipleArgs publisher,
             IPoolElement<IInvokableMultipleArgs> poolElement)
         {
-            PoolElement = poolElement;
+            poolElement = poolElement;
 
-            Publisher = publisher;
+            this.publisher = publisher;
             
             Active = true;
         }
@@ -85,10 +102,10 @@ namespace HereticalSolutions.Delegates.Subscriptions
             if (!Active)
                 throw new Exception("[SubscriptionMultipleArgs] ATTEMPT TO TERMINATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
 			
-            if (Publisher != publisher)
+            if (this.publisher != publisher)
                 throw new Exception("[SubscriptionMultipleArgs] INVALID PUBLISHER");
 			
-            if (PoolElement == null)
+            if (poolElement == null)
                 throw new Exception("[SubscriptionMultipleArgs] INVALID POOL ELEMENT");
 
             return true;
@@ -96,9 +113,9 @@ namespace HereticalSolutions.Delegates.Subscriptions
         
         public void Terminate()
         {
-            PoolElement = null;
+            poolElement = null;
             
-            Publisher = null;
+            publisher = null;
             
             Active = false;
         }
