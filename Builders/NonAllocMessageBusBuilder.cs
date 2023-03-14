@@ -1,10 +1,13 @@
 using System;
-using System.Collections.Generic;
+
+using HereticalSolutions.Collections;
 using HereticalSolutions.Collections.Allocations;
-using HereticalSolutions.Delegates;
+
 using HereticalSolutions.Delegates.Factories;
+
 using HereticalSolutions.Pools;
 using HereticalSolutions.Pools.Factories;
+
 using HereticalSolutions.Repositories;
 using HereticalSolutions.Repositories.Factories;
 
@@ -53,10 +56,32 @@ namespace HereticalSolutions.Messaging.Factories
 
         public NonAllocMessageBus Build()
         {
+            Func<IPoolElement<IMessage>> valueAllocationDelegate = PoolsFactory.NullAllocationDelegate<IPoolElement<IMessage>>;
+            
+            INonAllocDecoratedPool<IPoolElement<IMessage>> mailbox = PoolsFactory.BuildResizableNonAllocPool<IPoolElement<IMessage>>(
+                valueAllocationDelegate,
+                new []
+                {
+                    PoolsFactory.BuildIndexedMetadataDescriptor()
+                },
+                new AllocationCommandDescriptor
+                {
+                    Rule = EAllocationAmountRule.ADD_ONE
+                },
+                new AllocationCommandDescriptor
+                {
+                    Rule = EAllocationAmountRule.DOUBLE_AMOUNT
+                });
+            
+            var mailboxContents = ((IModifiable<INonAllocPool<IPoolElement<IMessage>>>)mailbox).Contents;
+            
+            var mailboxContentAsIndexable = (IIndexable<IPoolElement<IPoolElement<IMessage>>>)mailboxContents;
+            
             return new NonAllocMessageBus(
                 broadcasterBuilder.Build(),
                 (IReadOnlyObjectRepository)messagePoolRepository,
-                new Queue<IPoolElement<IMessage>>());
+                mailbox,
+                mailboxContentAsIndexable);
         }
     }
 }

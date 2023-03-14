@@ -1,5 +1,6 @@
 using System;
-using System.Collections.Generic;
+
+using HereticalSolutions.Collections;
 
 using HereticalSolutions.Delegates;
 using HereticalSolutions.Delegates.Broadcasting;
@@ -14,22 +15,27 @@ namespace HereticalSolutions.Messaging
         : INonAllocMessageSender, 
 	      INonAllocMessageReceiver
     {
-        private NonAllocBroadcasterWithRepository broadcaster;
+        private readonly NonAllocBroadcasterWithRepository broadcaster;
 
-        private IReadOnlyObjectRepository messageRepository;
+        private readonly IReadOnlyObjectRepository messageRepository;
 
-        private Queue<IPoolElement<IMessage>> mailbox;
+        private readonly INonAllocDecoratedPool<IPoolElement<IMessage>> mailbox;
+
+        private readonly IIndexable<IPoolElement<IPoolElement<IMessage>>> mailboxContentsAsIndexable;
 
         public NonAllocMessageBus(
             NonAllocBroadcasterWithRepository broadcaster,
             IReadOnlyObjectRepository messageRepository,
-            Queue<IPoolElement<IMessage>> mailbox)
+            INonAllocDecoratedPool<IPoolElement<IMessage>> mailbox,
+            IIndexable<IPoolElement<IPoolElement<IMessage>>> mailboxContentsAsIndexable)
         {
             this.broadcaster = broadcaster;
 
             this.messageRepository = messageRepository;
 
             this.mailbox = mailbox;
+
+            this.mailboxContentsAsIndexable = mailboxContentsAsIndexable;
         }
 
         #region IMessageSenderNonAlloc
@@ -94,17 +100,21 @@ namespace HereticalSolutions.Messaging
 
         public void Send(IPoolElement<IMessage> message)
         {
-            mailbox.Enqueue(message);
+            var messageElement = mailbox.Pop(null);
+
+            messageElement.Value = message;
         }
 
         public void Send<TMessage>(IPoolElement<IMessage> message) where TMessage : IMessage
         {
-            mailbox.Enqueue(message);
+            var messageElement = mailbox.Pop(null);
+
+            messageElement.Value = message;
         }
 
         public void SendImmediately(IPoolElement<IMessage> message)
         {
-            broadcaster.Publish(message.Value.GetType(), message);
+            broadcaster.Publish(message.Value.GetType(), message.Value);
 
             PushMessageToPool(message);
         }
@@ -122,13 +132,15 @@ namespace HereticalSolutions.Messaging
         
         public void DeliverMessagesInMailbox()
         {
-            int messagesToReceive = mailbox.Count;
+            int messagesToReceive = mailboxContentsAsIndexable.Count;
 
             for (int i = 0; i < messagesToReceive; i++)
             {
-                var message = mailbox.Dequeue();
+                var message = mailboxContentsAsIndexable[0];
 
-                SendImmediately(message);
+                SendImmediately(message.Value);
+                
+                mailbox.Push(message);
             }
         }
 

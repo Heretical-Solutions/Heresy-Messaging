@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+
 using HereticalSolutions.Collections.Allocations;
-using HereticalSolutions.Delegates;
+
 using HereticalSolutions.Delegates.Factories;
+
 using HereticalSolutions.Pools;
 using HereticalSolutions.Pools.Factories;
+
 using HereticalSolutions.Repositories;
 using HereticalSolutions.Repositories.Factories;
 
@@ -16,17 +19,11 @@ namespace HereticalSolutions.Messaging.Factories
 
         private readonly BroadcasterWithRepositoryBuilder broadcasterBuilder;
         
-        //private readonly AllocationCommand<IMessage> initialAllocationCommand;
-        
-        //private readonly AllocationCommand<IMessage> additionalAllocationCommand;
-
         public MessageBusBuilder()
         {
             messagePoolRepository = RepositoriesFactory.BuildDictionaryObjectRepository();
 
             broadcasterBuilder = new BroadcasterWithRepositoryBuilder();
-            
-            
         }
 
         public MessageBusBuilder AddMessageType<TMessage>()

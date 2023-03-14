@@ -13,11 +13,11 @@ namespace HereticalSolutions.Messaging
         : IMessageSender, 
 	      IMessageReceiver
     {
-	    private BroadcasterWithRepository broadcaster;
+	    private readonly BroadcasterWithRepository broadcaster;
 
-        private IReadOnlyObjectRepository messageRepository;
+        private readonly IReadOnlyObjectRepository messageRepository;
 
-        private Queue<IMessage> mailbox;
+        private readonly Queue<IMessage> mailbox;
 
         public MessageBus(
 	        BroadcasterWithRepository broadcaster,
