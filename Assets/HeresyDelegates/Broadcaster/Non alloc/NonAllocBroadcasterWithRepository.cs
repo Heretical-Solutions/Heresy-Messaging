@@ -1,4 +1,5 @@
 using System;
+
 using HereticalSolutions.Repositories;
 
 namespace HereticalSolutions.Delegates.Broadcasting
@@ -19,11 +20,11 @@ namespace HereticalSolutions.Delegates.Broadcasting
         public void Publish<TValue>(TValue value)
         {
             var messageType = typeof(TValue);
-            
+
             if (!broadcasterRepository.TryGet(
                     messageType,
                     out object broadcasterObject))
-                return;
+                throw new Exception($"[NonAllocBroadcasterWithRepository] INVALID MESSAGE TYPE: \"{messageType.ToBeautifulString()}\"");
 
             var broadcaster = (IPublisherSingleArgGeneric<TValue>)broadcasterObject;
             
@@ -37,7 +38,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
             if (!broadcasterRepository.TryGet(
                     messageType,
                     out object broadcasterObject))
-                return;
+                throw new Exception($"[NonAllocBroadcasterWithRepository] INVALID MESSAGE TYPE: \"{messageType.ToBeautifulString()}\"");
 
             var broadcaster = (IPublisherSingleArg)broadcasterObject;
             
@@ -55,7 +56,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
             if (!broadcasterRepository.TryGet(
                     messageType,
                     out object broadcasterObject))
-                return;
+                throw new Exception($"[NonAllocBroadcasterWithRepository] INVALID MESSAGE TYPE: \"{messageType.ToBeautifulString()}\"");
 
             var broadcaster = (INonAllocSubscribableSingleArgGeneric<TValue>)broadcasterObject;
             
@@ -69,7 +70,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
             if (!broadcasterRepository.TryGet(
                     messageType,
                     out object broadcasterObject))
-                return;
+                throw new Exception($"[NonAllocBroadcasterWithRepository] INVALID MESSAGE TYPE: \"{messageType.ToBeautifulString()}\"");
 
             var broadcaster = (INonAllocSubscribableSingleArg)broadcasterObject;
             
@@ -83,7 +84,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
             if (!broadcasterRepository.TryGet(
                     messageType,
                     out object broadcasterObject))
-                return;
+                throw new Exception($"[NonAllocBroadcasterWithRepository] INVALID MESSAGE TYPE: \"{messageType.ToBeautifulString()}\"");
 
             var broadcaster = (INonAllocSubscribableSingleArgGeneric<TValue>)broadcasterObject;
             
@@ -97,7 +98,7 @@ namespace HereticalSolutions.Delegates.Broadcasting
             if (!broadcasterRepository.TryGet(
                     messageType,
                     out object broadcasterObject))
-                return;
+                throw new Exception($"[NonAllocBroadcasterWithRepository] INVALID MESSAGE TYPE: \"{messageType.ToBeautifulString()}\"");
 
             var broadcaster = (INonAllocSubscribableSingleArg)broadcasterObject;
             

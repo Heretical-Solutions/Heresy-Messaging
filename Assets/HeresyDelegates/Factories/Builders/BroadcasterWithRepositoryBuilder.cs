@@ -1,28 +1,31 @@
+using System;
 using System.Collections.Generic;
 
 using HereticalSolutions.Delegates.Broadcasting;
+using HereticalSolutions.Repositories;
+using HereticalSolutions.Repositories.Factories;
 
 namespace HereticalSolutions.Delegates.Factories
 {
     public class BroadcasterWithRepositoryBuilder
     {
-        private List<object> broadcastersList;
+        private readonly IRepository<Type, object> broadcastersRepository;
 
         public BroadcasterWithRepositoryBuilder()
         {
-            broadcastersList = new List<object>();
+            broadcastersRepository = RepositoriesFactory.BuildDictionaryRepository<Type, object>();
         }
 
         public BroadcasterWithRepositoryBuilder Add<TBroadcaster>()
         {
-            broadcastersList.Add(DelegatesFactory.BuildBroadcasterGeneric<TBroadcaster>());
+            broadcastersRepository.Add(typeof(TBroadcaster), DelegatesFactory.BuildBroadcasterGeneric<TBroadcaster>());
 
             return this;
         }
 
         public BroadcasterWithRepository Build()
         {
-            return DelegatesFactory.BuildBroadcasterWithRepository(broadcastersList.ToArray());
+            return DelegatesFactory.BuildBroadcasterWithRepository(broadcastersRepository);
         }
     }
 }

@@ -1,5 +1,3 @@
-using System;
-
 using HereticalSolutions.Collections;
 using HereticalSolutions.Pools;
 
@@ -47,21 +45,8 @@ namespace HereticalSolutions.Delegates.Pinging
 		
 		public void Subscribe(ISubscriptionHandler<INonAllocSubscribableNoArgs, IInvokableNoArgs> subscription)
 		{
-			#region Validate
-			
-			if (subscription.Active)
-				throw new Exception("[NonAllocPinger] ATTEMPT TO ACTIVATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
-			
-			if (subscription.Publisher != null)
-				throw new Exception("[NonAllocPinger] SUBSCRIPTION ALREADY HAS A PUBLISHER");
-			
-			if (subscription.PoolElement != null)
-				throw new Exception("[NonAllocPinger] SUBSCRIPTION ALREADY HAS A POOL ELEMENT");
-			
-			if (subscription.Delegate == null)
-				throw new Exception("[NonAllocPinger] INVALID DELEGATE");
-			
-			#endregion
+			if (!subscription.ValidateActivation(this))
+				return;
 			
 			var subscriptionElement = subscriptionsPool.Pop(null);
 
@@ -72,18 +57,8 @@ namespace HereticalSolutions.Delegates.Pinging
 
 		public void Unsubscribe(ISubscriptionHandler<INonAllocSubscribableNoArgs, IInvokableNoArgs> subscription)
 		{
-			#region Validate
-			
-			if (!subscription.Active)
-				throw new Exception("[NonAllocPinger] ATTEMPT TO TERMINATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
-			
-			if (subscription.Publisher != this)
-				throw new Exception("[NonAllocPinger] INVALID PUBLISHER");
-			
-			if (subscription.PoolElement == null)
-				throw new Exception("[NonAllocPinger] INVALID POOL ELEMENT");
-			
-			#endregion
+			if (!subscription.ValidateTermination(this))
+				return;
 
 			var poolElement = subscription.PoolElement;
 			

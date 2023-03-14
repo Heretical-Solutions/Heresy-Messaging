@@ -52,6 +52,23 @@ namespace HereticalSolutions.Delegates.Subscriptions
 
         public IPoolElement<IInvokableMultipleArgs> PoolElement { get; private set; }
         
+        public bool ValidateActivation(INonAllocSubscribableMultipleArgs publisher)
+        {
+            if (Active)
+                throw new Exception("[SubscriptionMultipleArgs] ATTEMPT TO ACTIVATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
+			
+            if (Publisher != null)
+                throw new Exception("[SubscriptionMultipleArgs] SUBSCRIPTION ALREADY HAS A PUBLISHER");
+			
+            if (PoolElement != null)
+                throw new Exception("[SubscriptionMultipleArgs] SUBSCRIPTION ALREADY HAS A POOL ELEMENT");
+			
+            if (Delegate == null)
+                throw new Exception("[SubscriptionMultipleArgs] INVALID DELEGATE");
+
+            return true;
+        }
+        
         public void Activate(
             INonAllocSubscribableMultipleArgs publisher,
             IPoolElement<IInvokableMultipleArgs> poolElement)
@@ -61,6 +78,20 @@ namespace HereticalSolutions.Delegates.Subscriptions
             Publisher = publisher;
             
             Active = true;
+        }
+        
+        public bool ValidateTermination(INonAllocSubscribableMultipleArgs publisher)
+        {
+            if (!Active)
+                throw new Exception("[SubscriptionMultipleArgs] ATTEMPT TO TERMINATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
+			
+            if (Publisher != publisher)
+                throw new Exception("[SubscriptionMultipleArgs] INVALID PUBLISHER");
+			
+            if (PoolElement == null)
+                throw new Exception("[SubscriptionMultipleArgs] INVALID POOL ELEMENT");
+
+            return true;
         }
         
         public void Terminate()

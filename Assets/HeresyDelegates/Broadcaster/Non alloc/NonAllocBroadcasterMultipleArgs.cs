@@ -46,21 +46,8 @@ namespace HereticalSolutions.Delegates.Broadcasting
 		
 		public void Subscribe(ISubscriptionHandler<INonAllocSubscribableMultipleArgs, IInvokableMultipleArgs> subscription)
 		{
-			#region Validate
-			
-			if (subscription.Active)
-				throw new Exception("[NonAllocBroadcasterMultipleArgs] ATTEMPT TO ACTIVATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
-			
-			if (subscription.Publisher != null)
-				throw new Exception("[NonAllocBroadcasterMultipleArgs] SUBSCRIPTION ALREADY HAS A PUBLISHER");
-			
-			if (subscription.PoolElement != null)
-				throw new Exception("[NonAllocBroadcasterMultipleArgs] SUBSCRIPTION ALREADY HAS A POOL ELEMENT");
-			
-			if (subscription.Delegate == null)
-				throw new Exception("[NonAllocBroadcasterMultipleArgs] INVALID DELEGATE");
-			
-			#endregion
+			if (!subscription.ValidateActivation(this))
+				return;
 			
 			var subscriptionElement = subscriptionsPool.Pop(null);
 
@@ -71,18 +58,8 @@ namespace HereticalSolutions.Delegates.Broadcasting
 
 		public void Unsubscribe(ISubscriptionHandler<INonAllocSubscribableMultipleArgs, IInvokableMultipleArgs> subscription)
 		{
-			#region Validate
-			
-			if (!subscription.Active)
-				throw new Exception("[NonAllocBroadcasterMultipleArgs] ATTEMPT TO TERMINATE A SUBSCRIPTION THAT IS ALREADY ACTIVE");
-			
-			if (subscription.Publisher != this)
-				throw new Exception("[NonAllocBroadcasterMultipleArgs] INVALID PUBLISHER");
-			
-			if (subscription.PoolElement == null)
-				throw new Exception("[NonAllocBroadcasterMultipleArgs] INVALID POOL ELEMENT");
-			
-			#endregion
+			if (!subscription.ValidateTermination(this))
+				return;
 
 			var poolElement = subscription.PoolElement;
 			

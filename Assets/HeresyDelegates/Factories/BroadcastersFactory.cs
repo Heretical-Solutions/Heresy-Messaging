@@ -28,16 +28,9 @@ namespace HereticalSolutions.Delegates.Factories
         #region Broadcaster with repository
 
         public static BroadcasterWithRepository BuildBroadcasterWithRepository(
-            object[] broadcastersByType)
+            IRepository<Type, object> broadcastersRepository)
         {
-            IObjectRepository repository = RepositoriesFactory.BuildDictionaryObjectRepository();
-
-            foreach (var broadcaster in broadcastersByType)
-            {
-                repository.Add(broadcaster.GetType(), broadcaster);
-            }
-
-            return BuildBroadcasterWithRepository((IReadOnlyObjectRepository)repository);
+            return BuildBroadcasterWithRepository(RepositoriesFactory.BuildDictionaryObjectRepository(broadcastersRepository));
         }
         
         public static BroadcasterWithRepository BuildBroadcasterWithRepository(IReadOnlyObjectRepository repository)
@@ -113,16 +106,9 @@ namespace HereticalSolutions.Delegates.Factories
         #region Non alloc broadcaster with repository
         
         public static NonAllocBroadcasterWithRepository BuildNonAllocBroadcasterWithRepository(
-            object[] broadcastersByType)
+            IRepository<Type, object> broadcastersRepository)
         {
-            IObjectRepository repository = RepositoriesFactory.BuildDictionaryObjectRepository();
-
-            foreach (var broadcaster in broadcastersByType)
-            {
-                repository.Add(broadcaster.GetType(), broadcaster);
-            }
-
-            return BuildNonAllocBroadcasterWithRepository((IReadOnlyObjectRepository)repository);
+            return BuildNonAllocBroadcasterWithRepository(RepositoriesFactory.BuildDictionaryObjectRepository(broadcastersRepository));
         }
         
         public static NonAllocBroadcasterWithRepository BuildNonAllocBroadcasterWithRepository(

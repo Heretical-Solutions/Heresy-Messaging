@@ -166,24 +166,34 @@ namespace HereticalSolutions.Messaging
 
         #region IMessageReceiverNonAlloc
         
-        public void SubscribeTo<TMessage>(ISubscriptionHandler<INonAllocSubscribableSingleArgGeneric<TMessage>, IInvokableSingleArgGeneric<TMessage>> subscription) where TMessage : IMessage
+        public void SubscribeTo<TMessage>(ISubscription<INonAllocSubscribableSingleArgGeneric<TMessage>> subscription) where TMessage : IMessage
         {
-            broadcaster.Subscribe<TMessage>(subscription);
+            broadcaster.Subscribe<TMessage>((ISubscriptionHandler<INonAllocSubscribableSingleArgGeneric<TMessage>, IInvokableSingleArgGeneric<TMessage>>)subscription);
+        }
+        
+        public void SubscribeTo<TMessage>(ISubscription<INonAllocSubscribableSingleArg> subscription)
+        {
+            broadcaster.Subscribe(typeof(TMessage), (ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg>)subscription);
         }
 
-        public void SubscribeTo(Type messageType, ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg> subscription)
+        public void SubscribeTo(Type messageType, ISubscription<INonAllocSubscribableSingleArg> subscription)
         {
-            broadcaster.Subscribe(messageType, subscription);
+            broadcaster.Subscribe(messageType, (ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg>)subscription);
         }
 
-        public void UnsubscribeFrom<TMessage>(ISubscriptionHandler<INonAllocSubscribableSingleArgGeneric<TMessage>, IInvokableSingleArgGeneric<TMessage>> subscription) where TMessage : IMessage
+        public void UnsubscribeFrom<TMessage>(ISubscription<INonAllocSubscribableSingleArgGeneric<TMessage>> subscription) where TMessage : IMessage
         {
-            broadcaster.Unsubscribe<TMessage>(subscription);
+            broadcaster.Unsubscribe<TMessage>((ISubscriptionHandler<INonAllocSubscribableSingleArgGeneric<TMessage>, IInvokableSingleArgGeneric<TMessage>>)subscription);
+        }
+        
+        public void UnsubscribeFrom<TMessage>(ISubscription<INonAllocSubscribableSingleArg> subscription)
+        {
+            broadcaster.Unsubscribe(typeof(TMessage), (ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg>)subscription);
         }
 
-        public void UnsubscribeFrom(Type messageType, ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg> subscription)
+        public void UnsubscribeFrom(Type messageType, ISubscription<INonAllocSubscribableSingleArg> subscription)
         {
-            broadcaster.Unsubscribe(messageType, subscription);
+            broadcaster.Unsubscribe(messageType, (ISubscriptionHandler<INonAllocSubscribableSingleArg, IInvokableSingleArg>)subscription);
         }
         
         #endregion
