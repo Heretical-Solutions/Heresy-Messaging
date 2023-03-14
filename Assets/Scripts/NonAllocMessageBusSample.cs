@@ -1,10 +1,12 @@
 using HereticalSolutions.Delegates;
 using HereticalSolutions.Delegates.Factories;
+
 using HereticalSolutions.Messaging;
 using HereticalSolutions.Messaging.Factories;
+
 using UnityEngine;
 
-public class MessageBusSample : MonoBehaviour
+public class NonAllocMessageBusSample : MonoBehaviour
 {
     private INonAllocMessageSender messageBusAsSender;
 
@@ -12,11 +14,9 @@ public class MessageBusSample : MonoBehaviour
 
     private ISubscription subscription;
 
-    private string messageText1 = "Message single generic sent";
+    private readonly string messageText1 = "Message all generics sent";
     
-    private string messageText2 = "Message all generics sent";
-    
-    private string messageText3 = "Message typeof sent";
+    private readonly string messageText2 = "Message typeof sent";
     
     private object[] messageArgs;
     
@@ -55,12 +55,15 @@ public class MessageBusSample : MonoBehaviour
     void Print(SampleMessage message)
     {
         //Just imagine this. I need to ensure there are no allocations on 'non alloc' message bus so i leave this commented out
+        
         //Debug.Log(message.Message);
     }
 
     // Update is called once per frame
     void Update()
     {
+        DeliverMessagesInMailbox();
+        
         if (subscription.Active)
             SendMessage();
         
@@ -75,44 +78,55 @@ public class MessageBusSample : MonoBehaviour
         }
     }
 
+    void DeliverMessagesInMailbox()
+    {
+        messageBusAsSender.DeliverMessagesInMailbox();
+    }
+
     void SendMessage()
     {
-        /*
-        bool singleGeneric = UnityEngine.Random.Range(0f, 1f) > 0.5f;
-
-        if (singleGeneric)
-        {
-            messageArgs[0] = messageText1;
-            
-            messageBusAsSender
-                .PopMessage<SampleMessage>(out var messageSingleGeneric)
-                .Write(messageSingleGeneric, messageArgs)
-                .SendImmediately(messageSingleGeneric);
-            
-            return;
-        }
-        */
-        
         bool allGenerics = UnityEngine.Random.Range(0f, 1f) > 0.5f;
+        
+        bool sendIntoMailbox = UnityEngine.Random.Range(0f, 1f) > 0.5f;
         
         if (allGenerics)
         {
-            messageArgs[0] = messageText2;
-            
-            messageBusAsSender
-                .PopMessage<SampleMessage>(out var messageAllGenerics)
-                .Write<SampleMessage>(messageAllGenerics, messageArgs)
-                .SendImmediately<SampleMessage>(messageAllGenerics);
-            
+            messageArgs[0] = messageText1;
+
+            if (sendIntoMailbox)
+            {
+                messageBusAsSender
+                    .PopMessage<SampleMessage>(out var messageAllGenerics)
+                    .Write<SampleMessage>(messageAllGenerics, messageArgs)
+                    .Send<SampleMessage>(messageAllGenerics);
+            }
+            else
+            {
+                messageBusAsSender
+                    .PopMessage<SampleMessage>(out var messageAllGenerics)
+                    .Write<SampleMessage>(messageAllGenerics, messageArgs)
+                    .SendImmediately<SampleMessage>(messageAllGenerics);
+            }
+
             return;
         }
         
-        messageArgs[0] = messageText3;
-        
-        messageBusAsSender
-            .PopMessage(typeof(SampleMessage), out var messageTypeofs)
-            .Write<SampleMessage>(messageTypeofs, messageArgs)
-            .SendImmediately<SampleMessage>(messageTypeofs);
+        messageArgs[0] = messageText2;
+
+        if (sendIntoMailbox)
+        {
+            messageBusAsSender
+                .PopMessage(typeof(SampleMessage), out var messageTypeofs)
+                .Write<SampleMessage>(messageTypeofs, messageArgs)
+                .Send<SampleMessage>(messageTypeofs);
+        }
+        else
+        {
+            messageBusAsSender
+                .PopMessage(typeof(SampleMessage), out var messageTypeofs)
+                .Write<SampleMessage>(messageTypeofs, messageArgs)
+                .SendImmediately<SampleMessage>(messageTypeofs);            
+        }
     }
 
     void Subscribe()
